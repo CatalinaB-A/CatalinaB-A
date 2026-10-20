@@ -24,6 +24,19 @@
 
 * { box-sizing: border-box; }
 
+.tunnel-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+main,
+.foot {
+  position: relative;
+  z-index: 1;
+}
+
 html { scroll-behavior: smooth; }
 
 body {
