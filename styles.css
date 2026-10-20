@@ -5,6 +5,9 @@
   --muted: #5c5c58;
   --border: #e3e3df;
   --accent: #4b5eff;
+  --chip-bg: #fbf0d2;
+  --chip-border: #d9b45a;
+  --chip-fg: #5a4300;
   --radius: 14px;
   --max: 960px;
 }
@@ -17,6 +20,9 @@
     --muted: #a3a39d;
     --border: #2c2c2a;
     --accent: #8b95ff;
+    --chip-bg: #2a2113;
+    --chip-border: #7a5f22;
+    --chip-fg: #f3d693;
   }
 }
 
@@ -183,12 +189,12 @@ h2 {
   margin: 1.25rem 0 0;
 }
 .chips li {
-  border: 1px solid var(--border);
-  background: var(--surface);
+  border: 1px solid var(--chip-border);
+  background: var(--chip-bg);
   border-radius: 999px;
   padding: .25rem .75rem;
   font-size: .85rem;
-  color: var(--fg);
+  color: var(--chip-fg);
 }
 
 .grid {
