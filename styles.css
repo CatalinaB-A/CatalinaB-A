@@ -17,6 +17,8 @@
   --eye-iris-deep: #38200f;
   --eye-iris-light: #b9824c;
   --eye-lash: #3a0f1e;
+  --eye-skin: #e9cdbf;
+  --eye-skin-deep: #c29a8b;
   --radius: 14px;
   --max: 960px;
 }
@@ -40,6 +42,8 @@
   --eye-iris-deep: #2c180b;
   --eye-iris-light: #c08a55;
   --eye-lash: #f0d3b8;
+  --eye-skin: #b98a76;
+  --eye-skin-deep: #8a5f52;
 }
 
 * { box-sizing: border-box; }

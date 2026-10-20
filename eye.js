@@ -1,5 +1,4 @@
-/* Ojo esférico 3D con aspecto de fantasma (WebGL2).
-   Acepta las props del círculo base de React Bits: color, size, fill, crackle, interactive, hoverStrength. */
+/* Ojo 3D tipo fantoma anatómico (WebGL2): globo, iris café, párpados con piel. */
 (function () {
   const VERTEX = `#version 300 es
 in vec2 aPosition;
@@ -16,13 +15,13 @@ uniform float uBlink;
 uniform float uPupil;
 uniform float uSize;
 uniform float uFill;
-uniform float uCrackle;
 uniform vec3 uSclera;
 uniform vec3 uIris;
 uniform vec3 uIrisDeep;
 uniform vec3 uIrisLight;
 uniform vec3 uLash;
-uniform vec3 uAura;
+uniform vec3 uSkin;
+uniform vec3 uSkinDeep;
 uniform vec2 uGaze;
 
 out vec4 outColor;
@@ -49,10 +48,38 @@ void main() {
   float z = sqrt(max(zz, 0.0));
   vec3 n = vec3(p, z) / max(R, 1e-4);
 
-  float angS = atan(p.y, p.x);
-  float halo = exp(-max(r - R, 0.0) * 16.0) * (0.72 + 0.28 * sin(angS * 6.0 + uTime * 0.8));
-  vec3 col = uAura * halo * 0.6 * uCrackle;
-  float alpha = halo * 0.22 * uCrackle;
+  float w = R * 1.02;
+  float nx = clamp(p.x / w, -1.0, 1.0);
+  float shape = max(1.0 - nx * nx, 0.0);
+  float upperOpen = R * 0.42 * pow(shape, 0.60);
+  float lowerOpen = -R * 0.34 * pow(shape, 0.85);
+  float b = smoothstep(0.0, 1.0, uBlink);
+  float upper = mix(upperOpen, lowerOpen + R * 0.028, b);
+  float lower = mix(lowerOpen, lowerOpen + R * 0.08, b * 0.45);
+  float lidIn = smoothstep(-0.0015, 0.0015, min(upper - p.y, p.y - lower));
+  float openMask = shape > 0.0 ? lidIn : 1.0;
+
+  // parche de piel de los párpados
+  vec2 sp = vec2(p.x / (R * 1.38), (p.y - R * 0.10) / (R * 1.50));
+  float skinMask = smoothstep(1.0, 0.80, length(sp));
+
+  float up = p.y - upper;
+  float down = lower - p.y;
+  vec3 skin = uSkin;
+  skin *= 0.90 + 0.18 * smoothstep(0.0, R * 0.55, up);
+  skin *= 0.94 + 0.10 * smoothstep(0.0, R * 0.40, down);
+  skin = mix(skin, uSkinDeep, smoothstep(R * 0.10, 0.0, up) * 0.22);
+  skin = mix(skin, uSkinDeep, smoothstep(R * 0.14, 0.0, down) * 0.14);
+  skin = mix(skin, uSkinDeep, smoothstep(R * 1.10, R * 0.55, up) * 0.10);
+
+  float crease = smoothstep(0.0065, 0.0, abs(p.y - (upper + R * 0.26))) * smoothstep(1.0, 0.82, abs(nx)) * 0.22;
+  skin = mix(skin, uSkinDeep, crease);
+  float trough = smoothstep(0.020, 0.0, abs(p.y - (lower - R * 0.20))) * smoothstep(1.0, 0.80, abs(nx)) * 0.15;
+  skin = mix(skin, uSkinDeep, trough);
+  skin *= 0.985 + 0.03 * hash21(floor(p * 260.0));
+
+  vec3 col = skin;
+  float alpha = skinMask * (1.0 - openMask) * uFill;
 
   if (zz > 0.0) {
     vec3 L = normalize(vec3(-0.45, 0.55, 0.72));
@@ -60,7 +87,7 @@ void main() {
     float fres = pow(1.0 - clamp(n.z, 0.0, 1.0), 2.2);
 
     vec3 sclera = uSclera * (0.40 + 0.64 * diff);
-    sclera += uAura * fres * 0.85;
+    sclera += uSkin * fres * 0.35;
     sclera = mix(sclera, uSclera * 0.72, smoothstep(0.86, 1.0, r / R) * 0.45);
 
     vec3 gazeDir = normalize(vec3(uGaze, sqrt(max(1.0 - dot(uGaze, uGaze), 0.08))));
@@ -87,25 +114,14 @@ void main() {
     ball = mix(ball, iris, irisMask);
     ball = mix(ball, uIrisDeep * 0.12, pupilMask);
     ball = mix(ball, vec3(1.0, 0.98, 0.95), glint);
-
-    float w = R * 1.02;
-    float nx = clamp(p.x / w, -1.0, 1.0);
-    float shape = max(1.0 - nx * nx, 0.0);
-    float upperOpen = R * 0.42 * pow(shape, 0.60);
-    float lowerOpen = -R * 0.34 * pow(shape, 0.85);
-    float b = smoothstep(0.0, 1.0, uBlink);
-    float upper = mix(upperOpen, lowerOpen + R * 0.028, b);
-    float lower = mix(lowerOpen, lowerOpen + R * 0.08, b * 0.45);
-    float lidIn = smoothstep(-0.0015, 0.0015, min(upper - p.y, p.y - lower));
     ball *= 0.8 + 0.2 * smoothstep(0.0, R * 0.5, upper - p.y);
     ball *= mix(0.55, 1.0, smoothstep(R, R * 0.72, r));
 
     float sphereAlpha = uFill * (0.84 + 0.16 * clamp(n.z, 0.0, 1.0));
     sphereAlpha *= smoothstep(R, R - 0.004, r);
-    sphereAlpha *= lidIn;
 
     col = mix(col, ball, lidIn);
-    alpha = max(alpha, sphereAlpha);
+    alpha = max(alpha, sphereAlpha * lidIn);
 
     float lid = smoothstep(0.0058, 0.0016, abs(p.y - upper)) * smoothstep(1.0, 0.92, abs(nx));
     col = mix(col, uLash, lid);
@@ -139,20 +155,6 @@ void main() {
     alpha = max(alpha, lowLine);
   }
 
-  // polvo espectral alrededor del orbe
-  for (int i = 0; i < 16; i++) {
-    float fi = float(i);
-    float h1 = hash21(vec2(fi, 7.0));
-    float h2 = hash21(vec2(fi, 13.0));
-    float a0 = h1 * 6.2831853 + uTime * (0.05 + 0.08 * h2) * (h1 > 0.5 ? 1.0 : -1.0);
-    float rad = R * (1.08 + 0.55 * h2);
-    float rise = fract(uTime * (0.03 + 0.05 * h2) + h1);
-    vec2 pos = vec2(cos(a0), sin(a0)) * rad + vec2(0.0, rise * 0.10 - 0.05);
-    float dot_ = smoothstep(0.0055, 0.0, length(p - pos)) * (1.0 - rise) * uCrackle;
-    col += uAura * dot_ * 0.9;
-    alpha = max(alpha, dot_ * 0.55);
-  }
-
   outColor = vec4(col * alpha, alpha);
 }`;
 
@@ -182,10 +184,8 @@ void main() {
 
   function createEye(container, options) {
     const props = {
-      color: '#7d1f3d',
       size: 0.33,
-      fill: 0.92,
-      crackle: 0.5,
+      fill: 1,
       interactive: true,
       hoverStrength: 0.7,
       sclera: '#f7efeb',
@@ -193,6 +193,8 @@ void main() {
       irisDeep: '#38200f',
       irisLight: '#b9824c',
       lash: '#3a0f1e',
+      skin: '#eac6b3',
+      skinDeep: '#c08d78',
       ...(options || {})
     };
 
@@ -240,7 +242,8 @@ void main() {
       uIrisDeep: parseColor(props.irisDeep),
       uIrisLight: parseColor(props.irisLight),
       uLash: parseColor(props.lash),
-      uAura: parseColor(props.color)
+      uSkin: parseColor(props.skin),
+      uSkinDeep: parseColor(props.skinDeep)
     };
 
     const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
@@ -293,13 +296,13 @@ void main() {
       gl.uniform2f(uniforms.uGaze, gaze.x, gaze.y);
       gl.uniform1f(uniforms.uSize, props.size);
       gl.uniform1f(uniforms.uFill, props.fill);
-      gl.uniform1f(uniforms.uCrackle, props.crackle);
       gl.uniform3fv(uniforms.uSclera, colors.uSclera);
       gl.uniform3fv(uniforms.uIris, colors.uIris);
       gl.uniform3fv(uniforms.uIrisDeep, colors.uIrisDeep);
       gl.uniform3fv(uniforms.uIrisLight, colors.uIrisLight);
       gl.uniform3fv(uniforms.uLash, colors.uLash);
-      gl.uniform3fv(uniforms.uAura, colors.uAura);
+      gl.uniform3fv(uniforms.uSkin, colors.uSkin);
+      gl.uniform3fv(uniforms.uSkinDeep, colors.uSkinDeep);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     };
 
@@ -365,7 +368,8 @@ void main() {
         colors.uIrisDeep = parseColor(props.irisDeep);
         colors.uIrisLight = parseColor(props.irisLight);
         colors.uLash = parseColor(props.lash);
-        colors.uAura = parseColor(props.color);
+        colors.uSkin = parseColor(props.skin);
+        colors.uSkinDeep = parseColor(props.skinDeep);
         draw(performance.now());
       },
       destroy() {

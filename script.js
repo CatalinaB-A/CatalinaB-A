@@ -27,17 +27,17 @@ const eyeEl = document.getElementById('eye');
 const tunnelEl = document.getElementById('tunnel');
 
 const eyeOptions = () => ({
-  color: color('--name'),
   size: 0.33,
-  fill: 0.92,
-  crackle: 0.5,
+  fill: 1,
   interactive: true,
   hoverStrength: 0.7,
   sclera: color('--eye-sclera'),
   iris: color('--eye-iris'),
   irisDeep: color('--eye-iris-deep'),
   irisLight: color('--eye-iris-light'),
-  lash: color('--eye-lash')
+  lash: color('--eye-lash'),
+  skin: color('--eye-skin'),
+  skinDeep: color('--eye-skin-deep')
 });
 
 const tunnelOptions = () => ({
