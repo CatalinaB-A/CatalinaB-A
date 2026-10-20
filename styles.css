@@ -168,16 +168,22 @@ main {
 }
 
 .hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr);
-  align-items: center;
-  gap: 2.5rem;
   padding: 4.5rem 0 3rem;
 }
 
 .hero-copy { max-width: 34rem; }
 
-.hero-visual { height: clamp(280px, 42vw, 460px); }
+.eye-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: .24;
+}
+
+@media (max-width: 640px) {
+  .eye-bg { opacity: .14; }
+}
 
 .avatar {
   width: 76px;
@@ -337,8 +343,7 @@ h2 {
 }
 
 @media (max-width: 800px) {
-  .hero { grid-template-columns: 1fr; gap: 1rem; padding-top: 3rem; }
-  .hero-visual { order: -1; height: 300px; }
+  .hero { padding-top: 3rem; }
 }
 
 @media (max-width: 640px) {
@@ -388,6 +393,8 @@ h2 {
   background: var(--accent);
   color: #fff;
 }
+
+.edit-bar[hidden] { display: none; }
 
 .edit-bar {
   position: fixed;

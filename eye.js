@@ -56,12 +56,11 @@ void main() {
   float b = smoothstep(0.0, 1.0, uBlink);
   float upper = mix(upperOpen, lowerOpen + R * 0.028, b);
   float lower = mix(lowerOpen, lowerOpen + R * 0.08, b * 0.45);
-  float lidIn = smoothstep(-0.0015, 0.0015, min(upper - p.y, p.y - lower));
-  float openMask = shape > 0.0 ? lidIn : 1.0;
+  float lidIn = smoothstep(-0.0015, 0.0015, min(upper - p.y, p.y - lower)) * smoothstep(0.0, 0.012, shape);
 
   // parche de piel de los párpados
   vec2 sp = vec2(p.x / (R * 1.38), (p.y - R * 0.10) / (R * 1.50));
-  float skinMask = smoothstep(1.0, 0.80, length(sp));
+  float skinMask = smoothstep(1.0, 0.32, length(sp));
 
   float up = p.y - upper;
   float down = lower - p.y;
@@ -79,7 +78,7 @@ void main() {
   skin *= 0.985 + 0.03 * hash21(floor(p * 260.0));
 
   vec3 col = skin;
-  float alpha = skinMask * (1.0 - openMask) * uFill;
+  float alpha = skinMask * (1.0 - lidIn) * uFill;
 
   if (zz > 0.0) {
     vec3 L = normalize(vec3(-0.45, 0.55, 0.72));
@@ -349,7 +348,7 @@ void main() {
     };
 
     window.addEventListener('pointermove', onPointerMove, { passive: true });
-    canvas.addEventListener('click', onBlink);
+    window.addEventListener("click", onBlink);
     const observer = new ResizeObserver(resize);
     observer.observe(container);
     const intersection = new IntersectionObserver(([entry]) => {
@@ -378,7 +377,7 @@ void main() {
         observer.disconnect();
         intersection.disconnect();
         window.removeEventListener('pointermove', onPointerMove);
-        canvas.removeEventListener('click', onBlink);
+        window.removeEventListener("click", onBlink);
         gl.deleteProgram(program);
         gl.deleteBuffer(buffer);
         gl.deleteVertexArray(vao);
