@@ -6,6 +6,7 @@
   <title>Catalina B. A. — Portafolio</title>
   <meta name="description" content="Portafolio personal de Catalina B. A.: proyectos, tecnologías y contacto.">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="crystalized-ball.css">
 </head>
 <body>
   <a class="skip" href="#contenido">Saltar al contenido</a>
@@ -22,14 +23,17 @@
 
   <main id="contenido">
     <section id="inicio" class="hero">
-      <img class="avatar" src="https://avatars.githubusercontent.com/u/344480770?v=4" alt="Foto de perfil de Catalina" width="120" height="120">
-      <p class="eyebrow">Portafolio personal</p>
-      <h1>Hola, soy <span class="accent">Catalina</span>.</h1>
-      <p class="lead">Bienvenida a mi espacio. Aquí reúno los proyectos en los que trabajo y la forma de contactarme.</p>
-      <div class="actions">
-        <a class="btn" href="#proyectos">Ver proyectos</a>
-        <a class="btn ghost" href="https://github.com/CatalinaB-A" target="_blank" rel="noopener">GitHub</a>
+      <div class="hero-copy">
+        <img class="avatar" src="https://avatars.githubusercontent.com/u/344480770?v=4" alt="Foto de perfil de Catalina" width="120" height="120">
+        <p class="eyebrow">Portafolio personal</p>
+        <h1>Hola, soy <span class="accent">Catalina</span>.</h1>
+        <p class="lead">Bienvenida a mi espacio. Aquí reúno los proyectos en los que trabajo y la forma de contactarme.</p>
+        <div class="actions">
+          <a class="btn" href="#proyectos">Ver proyectos</a>
+          <a class="btn ghost" href="https://github.com/CatalinaB-A" target="_blank" rel="noopener">GitHub</a>
+        </div>
       </div>
+      <div class="hero-visual" id="ball" aria-hidden="true"></div>
     </section>
 
     <section id="sobre-mi" class="block">
@@ -73,6 +77,8 @@
     <p>© <span id="year">2026</span> Catalina B. A.</p>
   </footer>
 
+  <script src="vendor/ogl.js" defer></script>
+  <script src="crystalized-ball.js" defer></script>
   <script src="script.js" defer></script>
 </body>
 </html>

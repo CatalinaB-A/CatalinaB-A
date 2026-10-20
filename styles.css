@@ -95,7 +95,18 @@ main {
   padding: 0 1.25rem;
 }
 
-.hero { padding: 5rem 0 3rem; max-width: 44rem; }
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 2rem;
+  max-width: var(--max);
+  padding: 4.5rem 0 3rem;
+}
+
+.hero-copy { max-width: 44rem; }
+
+.hero-visual { height: clamp(280px, 42vw, 460px); }
 
 .avatar {
   border-radius: 50%;
@@ -203,6 +214,11 @@ h2 {
   border-top: 1px solid var(--border);
   color: var(--muted);
   font-size: .875rem;
+}
+
+@media (max-width: 860px) {
+  .hero { grid-template-columns: 1fr; }
+  .hero-visual { order: -1; height: 260px; }
 }
 
 @media (max-width: 640px) {

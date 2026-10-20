@@ -14,3 +14,17 @@ menu.addEventListener('click', (event) => {
 });
 
 document.getElementById('year').textContent = new Date().getFullYear();
+
+const ballEl = document.getElementById('ball');
+if (ballEl && window.createCrystalizedBall) {
+  const scheme = matchMedia('(prefers-color-scheme: dark)');
+  const options = () => ({
+    preset: 'plasma',
+    color: getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(),
+    theme: scheme.matches ? 'dark' : 'light',
+    size: 0.72,
+    hoverStrength: 0.7
+  });
+  const ball = window.createCrystalizedBall(ballEl, options());
+  scheme.addEventListener('change', () => ball.update(options()));
+}
