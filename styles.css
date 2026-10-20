@@ -1,0 +1,227 @@
+:root {
+  --bg: #f7f7f5;
+  --surface: #ffffff;
+  --fg: #1b1b1a;
+  --muted: #5c5c58;
+  --border: #e3e3df;
+  --accent: #4b5eff;
+  --radius: 14px;
+  --max: 960px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121212;
+    --surface: #1b1b1b;
+    --fg: #ededeb;
+    --muted: #a3a39d;
+    --border: #2c2c2a;
+    --accent: #8b95ff;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--accent); }
+
+.skip {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  background: var(--surface);
+  padding: .6rem 1rem;
+  z-index: 10;
+}
+.skip:focus { left: 1rem; top: 1rem; }
+
+/* Header */
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 1rem 1.25rem;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+
+.brand {
+  font-weight: 650;
+  letter-spacing: -.01em;
+  color: var(--fg);
+  text-decoration: none;
+  margin-right: auto;
+}
+
+.menu { display: flex; gap: 1.25rem; }
+.menu a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: .95rem;
+}
+.menu a:hover { color: var(--fg); }
+
+.toggle {
+  display: none;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--fg);
+  border-radius: 8px;
+  padding: .35rem .7rem;
+  font: inherit;
+  font-size: .9rem;
+  cursor: pointer;
+}
+
+/* Sections */
+main {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+.hero { padding: 5rem 0 3rem; max-width: 44rem; }
+
+.avatar {
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  margin-bottom: 1.25rem;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  font-size: .75rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin: 0 0 .5rem;
+}
+
+h1 {
+  font-size: clamp(2rem, 6vw, 3.25rem);
+  line-height: 1.1;
+  letter-spacing: -.03em;
+  margin: 0 0 1rem;
+}
+
+.accent { color: var(--accent); }
+
+.lead {
+  font-size: 1.15rem;
+  color: var(--muted);
+  max-width: 36rem;
+}
+
+.actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.25rem; }
+
+.btn {
+  display: inline-block;
+  padding: .65rem 1.1rem;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 550;
+  font-size: .95rem;
+  border: 1px solid transparent;
+}
+.btn:hover { filter: brightness(1.08); }
+
+.btn.ghost {
+  background: transparent;
+  color: var(--fg);
+  border-color: var(--border);
+}
+.btn.ghost:hover { background: var(--surface); filter: none; }
+
+.block {
+  padding: 3rem 0;
+  border-top: 1px solid var(--border);
+}
+
+h2 {
+  font-size: 1.4rem;
+  letter-spacing: -.015em;
+  margin: 0 0 1rem;
+}
+
+.block p { color: var(--muted); max-width: 42rem; }
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  list-style: none;
+  padding: 0;
+  margin: 1.25rem 0 0;
+}
+.chips li {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 999px;
+  padding: .25rem .75rem;
+  font-size: .85rem;
+  color: var(--fg);
+}
+
+.grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+}
+.card h3 { margin: 0 0 .5rem; font-size: 1.05rem; }
+.card p { margin: 0 0 .75rem; font-size: .95rem; }
+.card a { font-size: .9rem; font-weight: 550; }
+
+.foot {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 2rem 1.25rem 3rem;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: .875rem;
+}
+
+@media (max-width: 640px) {
+  .toggle { display: inline-block; }
+  .menu {
+    display: none;
+    position: absolute;
+    inset: 100% 0 auto 0;
+    flex-direction: column;
+    gap: 0;
+    padding: .5rem 1.25rem 1rem;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .menu.open { display: flex; }
+  .menu a { padding: .5rem 0; }
+  .hero { padding-top: 3rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Catalina B. A. — Portafolio</title>
+  <meta name="description" content="Portafolio personal de Catalina B. A.: proyectos, tecnologías y contacto.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#contenido">Saltar al contenido</a>
+
+  <header class="bar">
+    <a class="brand" href="#inicio">Catalina B. A.</a>
+    <button class="toggle" type="button" aria-expanded="false" aria-controls="menu">Menú</button>
+    <nav id="menu" class="menu">
+      <a href="#sobre-mi">Sobre mí</a>
+      <a href="#proyectos">Proyectos</a>
+      <a href="#contacto">Contacto</a>
+    </nav>
+  </header>
+
+  <main id="contenido">
+    <section id="inicio" class="hero">
+      <img class="avatar" src="https://avatars.githubusercontent.com/u/344480770?v=4" alt="Foto de perfil de Catalina" width="120" height="120">
+      <p class="eyebrow">Portafolio personal</p>
+      <h1>Hola, soy <span class="accent">Catalina</span>.</h1>
+      <p class="lead">Bienvenida a mi espacio. Aquí reúno los proyectos en los que trabajo y la forma de contactarme.</p>
+      <div class="actions">
+        <a class="btn" href="#proyectos">Ver proyectos</a>
+        <a class="btn ghost" href="https://github.com/CatalinaB-A" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </section>
+
+    <section id="sobre-mi" class="block">
+      <h2>Sobre mí</h2>
+      <!-- Edita estos textos con tu información real. -->
+      <p>Me interesa la tecnología y el desarrollo web. Este sitio crece junto con mis proyectos: cada avance queda publicado aquí.</p>
+      <p>Actualmente estoy construyendo mi portafolio y aprendiendo a base de proyectos concretos.</p>
+      <ul class="chips" aria-label="Tecnologías">
+        <li>HTML</li>
+        <li>CSS</li>
+        <li>JavaScript</li>
+        <li>Git</li>
+      </ul>
+    </section>
+
+    <section id="proyectos" class="block">
+      <h2>Proyectos</h2>
+      <div class="grid">
+        <article class="card">
+          <h3>Portafolio personal</h3>
+          <p>Este sitio: una página estática hecha con HTML, CSS y JavaScript, publicada con GitHub Pages.</p>
+          <a href="https://github.com/CatalinaB-A/CatalinaB-A" target="_blank" rel="noopener">Ver repositorio</a>
+        </article>
+        <article class="card">
+          <h3>Próximamente</h3>
+          <p>Espacio reservado para el siguiente proyecto. Duplica esta tarjeta y cambia el título, la descripción y el enlace.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="contacto" class="block">
+      <h2>Contacto</h2>
+      <p>La forma más directa de escribirme es por GitHub.</p>
+      <div class="actions">
+        <a class="btn" href="https://github.com/CatalinaB-A" target="_blank" rel="noopener">Abrir mi GitHub</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p>© <span id="year">2026</span> Catalina B. A.</p>
+  </footer>
+
+  <script src="script.js" defer></script>
+</body>
+</html>
