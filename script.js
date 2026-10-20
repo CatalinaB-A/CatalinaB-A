@@ -22,15 +22,16 @@ const isDark = () => root.dataset.theme === 'dark';
 
 const color = name => getComputedStyle(root).getPropertyValue(name).trim();
 
-const ballEl = document.getElementById('ball');
+const nameEl = document.getElementById('name');
+const eyeEl = document.getElementById('eye');
 const tunnelEl = document.getElementById('tunnel');
 
-const ballOptions = () => ({
-  preset: 'plasma',
-  color: color('--accent'),
-  theme: isDark() ? 'dark' : 'light',
-  size: 0.72,
-  hoverStrength: 0.7
+const eyeOptions = () => ({
+  sclera: color('--eye-sclera'),
+  iris: color('--eye-iris'),
+  irisDeep: color('--eye-iris-deep'),
+  irisLight: color('--eye-iris-light'),
+  lash: color('--eye-lash')
 });
 
 const tunnelOptions = () => ({
@@ -55,12 +56,25 @@ const tunnelOptions = () => ({
   dpr: 1.5
 });
 
-const ball = ballEl && window.createCrystalizedBall
-  ? window.createCrystalizedBall(ballEl, ballOptions())
-  : null;
+const eye = eyeEl && window.createEye ? window.createEye(eyeEl, eyeOptions()) : null;
 const tunnel = tunnelEl && window.createLightTunnel
   ? window.createLightTunnel(tunnelEl, tunnelOptions())
   : null;
+
+if (nameEl && window.createBlurText) {
+  window.createBlurText(nameEl, {
+    text: nameEl.textContent.trim(),
+    effect: 'blur',
+    animateBy: 'words',
+    direction: 'top',
+    staggerFrom: 'center',
+    trigger: 'view',
+    delay: 110,
+    stepDuration: 0.5,
+    blur: 14,
+    distance: 26
+  });
+}
 
 const syncTheme = () => {
   const dark = isDark();
@@ -69,7 +83,7 @@ const syncTheme = () => {
 };
 
 const applyTheme = () => {
-  if (ball) ball.update(ballOptions());
+  if (eye) eye.update(eyeOptions());
   if (tunnel) tunnel.update(tunnelOptions());
 };
 
