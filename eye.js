@@ -1,4 +1,5 @@
-/* Ojo ilustrado en WebGL2: párpados, pestañeo, iris café y pupila reactiva. */
+/* Ojo esférico 3D con aspecto de fantasma (WebGL2).
+   Acepta las props del círculo base de React Bits: color, size, fill, crackle, interactive, hoverStrength. */
 (function () {
   const VERTEX = `#version 300 es
 in vec2 aPosition;
@@ -10,15 +11,27 @@ void main() {
 precision highp float;
 
 uniform vec2 uRes;
+uniform float uTime;
 uniform float uBlink;
 uniform float uPupil;
+uniform float uSize;
+uniform float uFill;
+uniform float uCrackle;
 uniform vec3 uSclera;
 uniform vec3 uIris;
 uniform vec3 uIrisDeep;
 uniform vec3 uIrisLight;
 uniform vec3 uLash;
+uniform vec3 uAura;
+uniform vec2 uGaze;
 
 out vec4 outColor;
+
+float hash21(vec2 p) {
+  p = fract(p * vec2(234.34, 435.345));
+  p += dot(p, p + 34.23);
+  return fract(p.x * p.y);
+}
 
 float seg(vec2 p, vec2 a, vec2 b) {
   vec2 pa = p - a;
@@ -30,88 +43,115 @@ float seg(vec2 p, vec2 a, vec2 b) {
 void main() {
   vec2 p = (gl_FragCoord.xy - 0.5 * uRes) / (min(uRes.x, uRes.y) * 1.12);
 
-  float ca = cos(0.055);
-  float sa = sin(0.055);
-  p = mat2(ca, -sa, sa, ca) * p;
+  float R = uSize;
+  float r = length(p);
+  float zz = R * R - r * r;
+  float z = sqrt(max(zz, 0.0));
+  vec3 n = vec3(p, z) / max(R, 1e-4);
 
-  float w = 0.34;
-  float n = clamp(p.x / w, -1.0, 1.0);
-  float shape = max(1.0 - n * n, 0.0);
-  float upperOpen = 0.134 * pow(shape, 0.60);
-  float lowerOpen = -0.100 * pow(shape, 0.85);
-  float b = smoothstep(0.0, 1.0, uBlink);
-  float upper = mix(upperOpen, lowerOpen + 0.009, b);
-  float lower = mix(lowerOpen, lowerOpen + 0.026, b * 0.45);
+  float angS = atan(p.y, p.x);
+  float halo = exp(-max(r - R, 0.0) * 16.0) * (0.72 + 0.28 * sin(angS * 6.0 + uTime * 0.8));
+  vec3 col = uAura * halo * 0.6 * uCrackle;
+  float alpha = halo * 0.22 * uCrackle;
 
-  float inset = min(min(upper - p.y, p.y - lower), (w - abs(p.x)) * 0.7);
-  float inside = smoothstep(-0.0015, 0.0015, inset);
+  if (zz > 0.0) {
+    vec3 L = normalize(vec3(-0.45, 0.55, 0.72));
+    float diff = max(dot(n, L), 0.0);
+    float fres = pow(1.0 - clamp(n.z, 0.0, 1.0), 2.2);
 
-  float vign = smoothstep(0.04, 0.22, length(vec2(p.x * 0.85, p.y * 1.35)));
-  vec3 sclera = mix(uSclera, uSclera * 0.9, vign);
-  sclera = mix(sclera, vec3(0.80, 0.54, 0.55), smoothstep(w * 0.58, w, abs(p.x)) * 0.2);
-  sclera *= 0.9 + 0.1 * smoothstep(0.0, 0.11, upper - p.y);
+    vec3 sclera = uSclera * (0.40 + 0.64 * diff);
+    sclera += uAura * fres * 0.85;
+    sclera = mix(sclera, uSclera * 0.72, smoothstep(0.86, 1.0, r / R) * 0.45);
 
-  vec2 ic = vec2(0.0, -0.004);
-  float ir = 0.103;
-  float di = length(p - ic);
-  float ang = atan(p.y - ic.y, p.x - ic.x);
-  float fiber = 0.5 + 0.5 * sin(ang * 92.0 + 3.0 * sin(ang * 11.0));
-  float radial = smoothstep(ir * 0.2, ir, di);
-  vec3 iris = mix(uIrisLight, uIrisDeep, radial * 0.85 + 0.15 * fiber);
-  iris = mix(iris, uIris, 0.35);
-  iris = mix(iris, uIrisDeep * 0.55, smoothstep(ir * 0.82, ir, di));
-  float irisMask = smoothstep(ir, ir - 0.003, di) * inside;
+    vec3 gazeDir = normalize(vec3(uGaze, sqrt(max(1.0 - dot(uGaze, uGaze), 0.08))));
+    vec3 tangentA = normalize(cross(gazeDir, vec3(0.0, 1.0, 0.0)));
+    vec3 tangentB = cross(gazeDir, tangentA);
+    vec2 local = vec2(dot(n, tangentA), dot(n, tangentB));
+    float lang = atan(local.y, local.x);
+    float az = acos(clamp(dot(n, gazeDir), -1.0, 1.0));
 
-  float pr = 0.037 * uPupil;
-  float pupil = smoothstep(pr, pr - 0.0025, di) * inside;
+    float irisMask = smoothstep(0.46, 0.415, az);
+    float fiber = 0.5 + 0.5 * sin(lang * 90.0 + 3.0 * sin(lang * 11.0));
+    vec3 iris = mix(uIrisLight, uIrisDeep, smoothstep(0.05, 0.46, az) * 0.9 + fiber * 0.1);
+    iris = mix(iris, uIris, 0.3);
+    iris = mix(iris, uIrisDeep * 0.7, smoothstep(0.40, 0.465, az));
+    iris *= 0.55 + 0.55 * diff;
 
-  vec2 h1 = ic + vec2(-0.040, 0.049);
-  vec2 h2 = ic + vec2(0.044, -0.031);
-  float g1 = smoothstep(0.030, 0.0, length((p - h1) * vec2(1.0, 0.85)));
-  float g2 = smoothstep(0.011, 0.0, length(p - h2));
-  float glint = clamp(g1 * 0.95 + g2 * 0.7, 0.0, 1.0) * inside;
+    float pupilMask = smoothstep(0.175 * uPupil, 0.152 * uPupil, az);
 
-  vec3 col = sclera;
-  col = mix(col, iris, irisMask);
-  col = mix(col, uIrisDeep * 0.16, pupil);
-  col = mix(col, vec3(1.0, 0.97, 0.93), glint);
-  float alpha = inside;
+    float g1 = smoothstep(0.030, 0.0, length(p - vec2(-0.048, 0.058)));
+    float g2 = smoothstep(0.011, 0.0, length(p - vec2(0.050, -0.036)));
+    float glint = clamp(g1 * 0.95 + g2 * 0.7, 0.0, 1.0);
 
-  float lid = smoothstep(0.0060, 0.0016, abs(p.y - upper)) * smoothstep(1.0, 0.92, abs(n));
-  col = mix(col, uLash, lid);
-  alpha = max(alpha, lid);
+    vec3 ball = sclera;
+    ball = mix(ball, iris, irisMask);
+    ball = mix(ball, uIrisDeep * 0.12, pupilMask);
+    ball = mix(ball, vec3(1.0, 0.98, 0.95), glint);
 
-  float water = smoothstep(0.0045, 0.0, abs(p.y - lower)) * inside * 0.5;
-  col = mix(col, vec3(1.0, 0.91, 0.89), water);
+    float w = R * 1.02;
+    float nx = clamp(p.x / w, -1.0, 1.0);
+    float shape = max(1.0 - nx * nx, 0.0);
+    float upperOpen = R * 0.42 * pow(shape, 0.60);
+    float lowerOpen = -R * 0.34 * pow(shape, 0.85);
+    float b = smoothstep(0.0, 1.0, uBlink);
+    float upper = mix(upperOpen, lowerOpen + R * 0.028, b);
+    float lower = mix(lowerOpen, lowerOpen + R * 0.08, b * 0.45);
+    float lidIn = smoothstep(-0.0015, 0.0015, min(upper - p.y, p.y - lower));
+    ball *= 0.8 + 0.2 * smoothstep(0.0, R * 0.5, upper - p.y);
+    ball *= mix(0.55, 1.0, smoothstep(R, R * 0.72, r));
 
-  float lash = 0.0;
-  for (int i = 0; i < 25; i++) {
-    float fi = float(i) / 24.0;
-    float x = mix(-w * 0.97, w * 0.97, fi);
-    float sx = clamp(x / w, -1.0, 1.0);
-    float sh = max(1.0 - sx * sx, 0.0);
-    float byOpen = 0.134 * pow(sh, 0.60);
-    float by = mix(byOpen, -0.100 * pow(sh, 0.85) + 0.009, b);
-    float edge = smoothstep(0.02, 0.22, by);
-    float alt = 0.72 + 0.28 * sin(float(i) * 12.9898);
-    vec2 a = vec2(x, by);
-    vec2 mid = a + normalize(vec2(sx * 1.4, 1.0)) * (0.016 + 0.020 * sh) * alt;
-    vec2 tip = mid + normalize(vec2(sx * 0.5 + 0.15, 1.0)) * (0.022 + 0.020 * sh) * alt;
-    float l = smoothstep(0.0040, 0.0012, seg(p, a, mid))
-      + smoothstep(0.0026, 0.0008, seg(p, mid, tip)) * 0.8;
-    lash += min(l, 1.0) * edge;
+    float sphereAlpha = uFill * (0.84 + 0.16 * clamp(n.z, 0.0, 1.0));
+    sphereAlpha *= smoothstep(R, R - 0.004, r);
+    sphereAlpha *= lidIn;
+
+    col = mix(col, ball, lidIn);
+    alpha = max(alpha, sphereAlpha);
+
+    float lid = smoothstep(0.0058, 0.0016, abs(p.y - upper)) * smoothstep(1.0, 0.92, abs(nx));
+    col = mix(col, uLash, lid);
+    alpha = max(alpha, lid);
+
+    float water = smoothstep(0.0045, 0.0, abs(p.y - lower)) * lidIn * 0.5;
+    col = mix(col, vec3(1.0, 0.91, 0.89), water);
+
+    float lash = 0.0;
+    for (int i = 0; i < 25; i++) {
+      float fi = float(i) / 24.0;
+      float x = mix(-w * 0.97, w * 0.97, fi);
+      float sx = clamp(x / w, -1.0, 1.0);
+      float sh = max(1.0 - sx * sx, 0.0);
+      float byOpen = R * 0.42 * pow(sh, 0.60);
+      float by = mix(byOpen, -R * 0.34 * pow(sh, 0.85) + R * 0.028, b);
+      float edge = smoothstep(0.02, R * 0.7, by);
+      float alt = 0.72 + 0.28 * sin(float(i) * 12.9898);
+      vec2 a = vec2(x, by);
+      vec2 mid = a + normalize(vec2(sx * 1.4, 1.0)) * (0.016 + 0.020 * sh) * alt;
+      vec2 tip = mid + normalize(vec2(sx * 0.5 + 0.15, 1.0)) * (0.022 + 0.020 * sh) * alt;
+      float l = smoothstep(0.0040, 0.0012, seg(p, a, mid))
+        + smoothstep(0.0026, 0.0008, seg(p, mid, tip)) * 0.8;
+      lash += min(l, 1.0) * edge;
+    }
+    col = mix(col, uLash, clamp(lash, 0.0, 1.0));
+    alpha = max(alpha, clamp(lash, 0.0, 1.0));
+
+    float lowLine = smoothstep(0.0035, 0.0008, abs(p.y - lower)) * smoothstep(1.0, 0.9, abs(nx)) * 0.32;
+    col = mix(col, uLash, lowLine);
+    alpha = max(alpha, lowLine);
   }
-  col = mix(col, uLash, clamp(lash, 0.0, 1.0));
-  alpha = max(alpha, clamp(lash, 0.0, 1.0));
 
-  float lowLine = smoothstep(0.0035, 0.0008, abs(p.y - lower)) * smoothstep(1.0, 0.9, abs(n)) * 0.32;
-  col = mix(col, uLash, lowLine);
-  alpha = max(alpha, lowLine);
-
-  vec2 shadowP = vec2(p.x * 0.72, (p.y + 0.15) * 3.0);
-  float shadow = smoothstep(0.42, 0.0, length(shadowP)) * 0.16;
-  col = mix(col, vec3(0.22, 0.09, 0.09), shadow);
-  alpha = max(alpha, shadow * 0.7);
+  // polvo espectral alrededor del orbe
+  for (int i = 0; i < 16; i++) {
+    float fi = float(i);
+    float h1 = hash21(vec2(fi, 7.0));
+    float h2 = hash21(vec2(fi, 13.0));
+    float a0 = h1 * 6.2831853 + uTime * (0.05 + 0.08 * h2) * (h1 > 0.5 ? 1.0 : -1.0);
+    float rad = R * (1.08 + 0.55 * h2);
+    float rise = fract(uTime * (0.03 + 0.05 * h2) + h1);
+    vec2 pos = vec2(cos(a0), sin(a0)) * rad + vec2(0.0, rise * 0.10 - 0.05);
+    float dot_ = smoothstep(0.0055, 0.0, length(p - pos)) * (1.0 - rise) * uCrackle;
+    col += uAura * dot_ * 0.9;
+    alpha = max(alpha, dot_ * 0.55);
+  }
 
   outColor = vec4(col * alpha, alpha);
 }`;
@@ -130,7 +170,7 @@ void main() {
   const parseColor = value => {
     const probe = document.createElement('canvas').getContext('2d');
     probe.fillStyle = '#000000';
-    probe.fillStyle = value;
+    if (value) probe.fillStyle = value;
     const resolved = probe.fillStyle;
     if (resolved.startsWith('#')) {
       const n = parseInt(resolved.slice(1), 16);
@@ -142,6 +182,12 @@ void main() {
 
   function createEye(container, options) {
     const props = {
+      color: '#7d1f3d',
+      size: 0.33,
+      fill: 0.92,
+      crackle: 0.5,
+      interactive: true,
+      hoverStrength: 0.7,
       sclera: '#f7efeb',
       iris: '#7a4a26',
       irisDeep: '#38200f',
@@ -193,11 +239,13 @@ void main() {
       uIris: parseColor(props.iris),
       uIrisDeep: parseColor(props.irisDeep),
       uIrisLight: parseColor(props.irisLight),
-      uLash: parseColor(props.lash)
+      uLash: parseColor(props.lash),
+      uAura: parseColor(props.color)
     };
 
     const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
     const pointer = { inside: false };
+    const gaze = { x: 0, y: 0, tx: 0, ty: 0 };
     const pupil = { value: 1 };
     const blink = { start: -1, duration: 0.34 };
     let nextBlink = performance.now() + 1600 + Math.random() * 2600;
@@ -229,20 +277,29 @@ void main() {
     };
 
     const draw = now => {
-      const target = pointer.inside ? 1.34 : 1;
+      const open = props.interactive ? 1 + 0.34 * clamp(props.hoverStrength, 0, 1) : 1;
+      const target = pointer.inside ? open : 1;
       pupil.value += (target - pupil.value) * 0.14;
+      gaze.x += (gaze.tx - gaze.x) * 0.12;
+      gaze.y += (gaze.ty - gaze.y) * 0.12;
       gl.clearColor(0, 0, 0, 0);
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.useProgram(program);
       gl.bindVertexArray(vao);
       gl.uniform2f(uniforms.uRes, canvas.width, canvas.height);
+      gl.uniform1f(uniforms.uTime, reduced ? 0 : now / 1000);
       gl.uniform1f(uniforms.uBlink, reduced ? 0 : blinkValue(now));
       gl.uniform1f(uniforms.uPupil, pupil.value);
+      gl.uniform2f(uniforms.uGaze, gaze.x, gaze.y);
+      gl.uniform1f(uniforms.uSize, props.size);
+      gl.uniform1f(uniforms.uFill, props.fill);
+      gl.uniform1f(uniforms.uCrackle, props.crackle);
       gl.uniform3fv(uniforms.uSclera, colors.uSclera);
       gl.uniform3fv(uniforms.uIris, colors.uIris);
       gl.uniform3fv(uniforms.uIrisDeep, colors.uIrisDeep);
       gl.uniform3fv(uniforms.uIrisLight, colors.uIrisLight);
       gl.uniform3fv(uniforms.uLash, colors.uLash);
+      gl.uniform3fv(uniforms.uAura, colors.uAura);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     };
 
@@ -255,9 +312,7 @@ void main() {
         nextBlink = now + 2400 + Math.random() * 4200;
       }
       draw(now);
-      if (!reduced || blink.start >= 0 || Math.abs(pupil.value - (pointer.inside ? 1.34 : 1)) > 0.002) {
-        raf = requestAnimationFrame(frame);
-      }
+      raf = requestAnimationFrame(frame);
     };
 
     const start = () => {
@@ -269,8 +324,17 @@ void main() {
 
     const onPointerMove = event => {
       const rect = canvas.getBoundingClientRect();
-      const nx = (event.clientX - (rect.left + rect.width / 2)) / (rect.width / 2);
-      const ny = (event.clientY - (rect.top + rect.height / 2)) / (rect.height / 2);
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const half = Math.min(rect.width, rect.height) / 2;
+      const gx = (event.clientX - cx) / half;
+      const gy = (cy - event.clientY) / half;
+      const len = Math.hypot(gx, gy) || 1;
+      const reach = Math.min(len, 1) * 0.24 / len;
+      gaze.tx = gx * reach;
+      gaze.ty = gy * reach;
+      const nx = (event.clientX - cx) / (rect.width / 2);
+      const ny = (event.clientY - cy) / (rect.height / 2);
       pointer.inside = nx * nx + ny * ny < 1.15;
       start();
     };
@@ -292,7 +356,6 @@ void main() {
     intersection.observe(container);
 
     resize();
-    start();
 
     return {
       update(next) {
@@ -302,8 +365,8 @@ void main() {
         colors.uIrisDeep = parseColor(props.irisDeep);
         colors.uIrisLight = parseColor(props.irisLight);
         colors.uLash = parseColor(props.lash);
+        colors.uAura = parseColor(props.color);
         draw(performance.now());
-        start();
       },
       destroy() {
         alive = false;
