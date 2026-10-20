@@ -362,3 +362,58 @@ h2 {
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
 }
+
+/* Editor local */
+.edit-toggle,
+.edit-bar button {
+  font: inherit;
+  font-size: .875rem;
+  border-radius: 999px;
+  border: 1px solid var(--gold-line);
+  background: var(--surface);
+  color: var(--fg);
+  padding: .5rem .9rem;
+  cursor: pointer;
+  box-shadow: 0 0 0 1px var(--gold-ring), 0 0 24px -10px var(--gold-glow);
+}
+
+.edit-toggle {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 20;
+}
+
+.edit-toggle[aria-pressed="true"] {
+  background: var(--accent);
+  color: #fff;
+}
+
+.edit-bar {
+  position: fixed;
+  left: 50%;
+  bottom: 1rem;
+  transform: translateX(-50%);
+  z-index: 21;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: .5rem;
+  max-width: min(92vw, 460px);
+}
+
+.edit-bar [data-edit-action="save"] { background: var(--accent); color: #fff; }
+
+body.editing [contenteditable="true"] {
+  outline: 1px dashed var(--gold-line);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+body.editing [contenteditable="true"]:focus {
+  outline: 1px solid var(--accent);
+}
+
+@media (max-width: 640px) {
+  .edit-bar { bottom: 4.25rem; }
+}
