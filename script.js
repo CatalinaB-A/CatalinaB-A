@@ -27,7 +27,7 @@ const eyeEl = document.getElementById('eye');
 const tunnelEl = document.getElementById('tunnel');
 
 const eyeOptions = () => ({
-  size: 0.33,
+  size: 0.27,
   fill: 1,
   interactive: true,
   hoverStrength: 0.7,

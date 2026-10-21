@@ -134,44 +134,53 @@ void main() {
     float water = smoothstep(0.0045, 0.0, abs(p.y - lower)) * lidIn * 0.5;
     col = mix(col, vec3(1.0, 0.91, 0.89), water);
 
-    // pestañas superiores: tres tramos, curvadas y con punta fina
+    // pestañas superiores: extensión larga, curvada y abanicada hacia afuera
     float lash = 0.0;
-    for (int i = 0; i < 38; i++) {
-      float fi = float(i) / 37.0;
+    for (int i = 0; i < 42; i++) {
+      float fi = float(i) / 41.0;
       float jit = hash21(vec2(float(i), 3.0)) - 0.5;
-      float x = mix(-w * 0.99, w * 0.99, fi) + jit * 0.012;
+      float x = mix(-w * 0.98, w * 0.98, fi) + jit * 0.009;
       float sx = clamp(x / w, -1.0, 1.0);
       float sh = max(1.0 - sx * sx, 0.0);
       float byOpen = R * 0.42 * pow(sh, 0.60);
       float by = mix(byOpen, -R * 0.34 * pow(sh, 0.85) + R * 0.028, b);
       float edge = smoothstep(0.0, 0.22, sh);
-      float len = (0.030 + 0.045 * sh) * (0.78 + 0.44 * hash21(vec2(float(i), 9.0)));
-      vec2 root = vec2(x, by - 0.0015);
-      vec2 midA = root + normalize(vec2(sx * 1.25, 1.0)) * len * 0.5;
-      vec2 tip = midA + normalize(vec2(sx * 0.55 + 0.18, 1.0)) * len * 0.55;
-      float wA = 0.0030 + 0.0016 * sh;
-      float wB = 0.0017 + 0.0010 * sh;
+      float outer = smoothstep(-1.0, 0.85, sx);
+      float len = (0.040 + 0.055 * sh) * (0.78 + 0.42 * hash21(vec2(float(i), 9.0))) * (0.72 + 0.55 * outer);
+      vec2 root = vec2(x, by - 0.002);
+      vec2 dir1 = normalize(vec2(sx * 0.9, 1.0));
+      vec2 midA = root + dir1 * len * 0.40;
+      vec2 dir2 = normalize(vec2(sx * 0.45 + 0.22, 1.0));
+      vec2 midB = midA + dir2 * len * 0.33;
+      vec2 dir3 = normalize(vec2(sx * 0.1 + 0.55, 1.0));
+      vec2 tip = midB + dir3 * len * 0.27;
+      float wA = 0.0042 + 0.0018 * sh;
+      float wB = 0.0028 + 0.0012 * sh;
+      float wC = 0.0015 + 0.0008 * sh;
       float l = max(
-        smoothstep(wA, wA * 0.35, seg(p, root, midA)),
-        smoothstep(wB, wB * 0.35, seg(p, midA, tip)) * 0.9
+        max(
+          smoothstep(wA, wA * 0.30, seg(p, root, midA)),
+          smoothstep(wB, wB * 0.30, seg(p, midA, midB)) * 0.95
+        ),
+        smoothstep(wC, wC * 0.30, seg(p, midB, tip)) * 0.85
       );
       lash = max(lash, l * edge);
     }
-    // pestañas inferiores: cortas, espaciadas y hacia abajo
-    for (int i = 0; i < 16; i++) {
-      float fi = float(i) / 15.0;
-      float x = mix(-w * 0.82, w * 0.82, fi) + (hash21(vec2(float(i), 27.0)) - 0.5) * 0.01;
+    // pestañas inferiores: cortas, curvadas hacia abajo y afuera
+    for (int i = 0; i < 24; i++) {
+      float fi = float(i) / 23.0;
+      float x = mix(-w * 0.84, w * 0.84, fi) + (hash21(vec2(float(i), 27.0)) - 0.5) * 0.008;
       float sx = clamp(x / w, -1.0, 1.0);
       float sh = max(1.0 - sx * sx, 0.0);
       float byLow = -R * 0.34 * pow(sh, 0.85);
       float by = mix(byLow, byLow + R * 0.08, b * 0.45);
-      float len = (0.011 + 0.013 * sh) * (0.7 + 0.6 * hash21(vec2(float(i), 21.0)));
+      float len = (0.016 + 0.022 * sh) * (0.70 + 0.60 * hash21(vec2(float(i), 21.0)));
       vec2 root = vec2(x, by + 0.0015);
-      vec2 midA = root + normalize(vec2(sx * 0.75, -1.0)) * len * 0.6;
-      vec2 tip = midA + normalize(vec2(sx * 0.35, -1.0)) * len * 0.5;
+      vec2 midA = root + normalize(vec2(sx * 0.55, -1.0)) * len * 0.55;
+      vec2 tip = midA + normalize(vec2(sx * 0.95, -1.0)) * len * 0.45;
       float l = max(
-        smoothstep(0.0018, 0.0007, seg(p, root, midA)),
-        smoothstep(0.0012, 0.0004, seg(p, midA, tip)) * 0.8
+        smoothstep(0.0024, 0.0009, seg(p, root, midA)),
+        smoothstep(0.0014, 0.0005, seg(p, midA, tip)) * 0.85
       );
       lash = max(lash, l * smoothstep(0.0, 0.12, sh));
     }
