@@ -134,22 +134,46 @@ void main() {
     float water = smoothstep(0.0045, 0.0, abs(p.y - lower)) * lidIn * 0.5;
     col = mix(col, vec3(1.0, 0.91, 0.89), water);
 
+    // pestañas superiores: tres tramos, curvadas y con punta fina
     float lash = 0.0;
-    for (int i = 0; i < 33; i++) {
-      float fi = float(i) / 32.0;
-      float x = mix(-w * 0.97, w * 0.97, fi);
+    for (int i = 0; i < 38; i++) {
+      float fi = float(i) / 37.0;
+      float jit = hash21(vec2(float(i), 3.0)) - 0.5;
+      float x = mix(-w * 0.99, w * 0.99, fi) + jit * 0.012;
       float sx = clamp(x / w, -1.0, 1.0);
       float sh = max(1.0 - sx * sx, 0.0);
       float byOpen = R * 0.42 * pow(sh, 0.60);
       float by = mix(byOpen, -R * 0.34 * pow(sh, 0.85) + R * 0.028, b);
-      float edge = smoothstep(0.02, R * 0.7, by);
-      float alt = 0.72 + 0.28 * sin(float(i) * 12.9898);
-      vec2 a = vec2(x, by);
-      vec2 mid = a + normalize(vec2(sx * 1.4, 1.0)) * (0.016 + 0.020 * sh) * alt;
-      vec2 tip = mid + normalize(vec2(sx * 0.5 + 0.15, 1.0)) * (0.022 + 0.020 * sh) * alt;
-      float l = smoothstep(0.0040, 0.0012, seg(p, a, mid))
-        + smoothstep(0.0026, 0.0008, seg(p, mid, tip)) * 0.8;
-      lash += min(l, 1.0) * edge;
+      float edge = smoothstep(0.0, 0.22, sh);
+      float len = (0.030 + 0.045 * sh) * (0.78 + 0.44 * hash21(vec2(float(i), 9.0)));
+      vec2 root = vec2(x, by - 0.0015);
+      vec2 midA = root + normalize(vec2(sx * 1.25, 1.0)) * len * 0.5;
+      vec2 tip = midA + normalize(vec2(sx * 0.55 + 0.18, 1.0)) * len * 0.55;
+      float wA = 0.0030 + 0.0016 * sh;
+      float wB = 0.0017 + 0.0010 * sh;
+      float l = max(
+        smoothstep(wA, wA * 0.35, seg(p, root, midA)),
+        smoothstep(wB, wB * 0.35, seg(p, midA, tip)) * 0.9
+      );
+      lash = max(lash, l * edge);
+    }
+    // pestañas inferiores: cortas, espaciadas y hacia abajo
+    for (int i = 0; i < 16; i++) {
+      float fi = float(i) / 15.0;
+      float x = mix(-w * 0.82, w * 0.82, fi) + (hash21(vec2(float(i), 27.0)) - 0.5) * 0.01;
+      float sx = clamp(x / w, -1.0, 1.0);
+      float sh = max(1.0 - sx * sx, 0.0);
+      float byLow = -R * 0.34 * pow(sh, 0.85);
+      float by = mix(byLow, byLow + R * 0.08, b * 0.45);
+      float len = (0.011 + 0.013 * sh) * (0.7 + 0.6 * hash21(vec2(float(i), 21.0)));
+      vec2 root = vec2(x, by + 0.0015);
+      vec2 midA = root + normalize(vec2(sx * 0.75, -1.0)) * len * 0.6;
+      vec2 tip = midA + normalize(vec2(sx * 0.35, -1.0)) * len * 0.5;
+      float l = max(
+        smoothstep(0.0018, 0.0007, seg(p, root, midA)),
+        smoothstep(0.0012, 0.0004, seg(p, midA, tip)) * 0.8
+      );
+      lash = max(lash, l * smoothstep(0.0, 0.12, sh));
     }
     col = mix(col, uLash, clamp(lash, 0.0, 1.0));
     alpha = max(alpha, clamp(lash, 0.0, 1.0));
@@ -254,7 +278,7 @@ void main() {
     const pointer = { inside: false };
     const gaze = { x: 0, y: 0, tx: 0, ty: 0 };
     const pupil = { value: 1 };
-    const blink = { start: -1, duration: 0.34 };
+    const blink = { start: -1, duration: 0.30 };
     let nextBlink = performance.now() + 1600 + Math.random() * 2600;
     let visible = true;
     let alive = true;
@@ -273,14 +297,20 @@ void main() {
       draw(performance.now());
     };
 
+    const smooth = x => {
+      const t = Math.min(1, Math.max(0, x));
+      return t * t * (3 - 2 * t);
+    };
+
     const blinkValue = now => {
       if (blink.start < 0) return 0;
       const u = (now - blink.start) / 1000 / blink.duration;
       if (u >= 1) {
         blink.start = -1;
+        if (Math.random() < 0.22) nextBlink = now + 130 + Math.random() * 120;
         return 0;
       }
-      return u < 0.3 ? u / 0.3 : u < 0.44 ? 1 : 1 - (u - 0.44) / 0.56;
+      return Math.max(0, smooth(u / 0.22) - smooth((u - 0.46) / 0.54));
     };
 
     const draw = now => {
