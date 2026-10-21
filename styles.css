@@ -12,13 +12,13 @@
   --gold-glow: rgba(201, 164, 92, .7);
   --sheen: rgba(255, 255, 255, .7);
   --sheen-line: rgba(255, 255, 255, .85);
-  --eye-sclera: #f7efeb;
-  --eye-iris: #7a4a26;
-  --eye-iris-deep: #38200f;
-  --eye-iris-light: #b9824c;
-  --eye-lash: #3a0f1e;
-  --eye-skin: #e9cdbf;
-  --eye-skin-deep: #c29a8b;
+  --eye-sclera: #f3e6df;
+  --eye-iris: #a2602a;
+  --eye-iris-deep: #2f170b;
+  --eye-iris-light: #d99a55;
+  --eye-lash: #2a0a12;
+  --eye-skin: #e3aaa2;
+  --eye-skin-deep: #b5736c;
   --radius: 14px;
   --max: 960px;
 }
@@ -37,13 +37,13 @@
   --gold-glow: rgba(243, 214, 147, .32);
   --sheen: rgba(255, 255, 255, .04);
   --sheen-line: rgba(255, 255, 255, .05);
-  --eye-sclera: #d6cfd2;
-  --eye-iris: #8a5a32;
-  --eye-iris-deep: #2c180b;
-  --eye-iris-light: #c08a55;
+  --eye-sclera: #cdbfc0;
+  --eye-iris: #a2602a;
+  --eye-iris-deep: #241006;
+  --eye-iris-light: #d99a55;
   --eye-lash: #f0d3b8;
-  --eye-skin: #b98a76;
-  --eye-skin-deep: #8a5f52;
+  --eye-skin: #b5736c;
+  --eye-skin-deep: #7e4a45;
 }
 
 * { box-sizing: border-box; }

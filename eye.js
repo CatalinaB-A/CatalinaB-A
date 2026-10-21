@@ -96,17 +96,22 @@ void main() {
     float lang = atan(local.y, local.x);
     float az = acos(clamp(dot(n, gazeDir), -1.0, 1.0));
 
-    float irisMask = smoothstep(0.46, 0.415, az);
-    float fiber = 0.5 + 0.5 * sin(lang * 90.0 + 3.0 * sin(lang * 11.0));
-    vec3 iris = mix(uIrisLight, uIrisDeep, smoothstep(0.05, 0.46, az) * 0.9 + fiber * 0.1);
-    iris = mix(iris, uIris, 0.3);
-    iris = mix(iris, uIrisDeep * 0.7, smoothstep(0.40, 0.465, az));
-    iris *= 0.55 + 0.55 * diff;
+    float irisMask = smoothstep(0.56, 0.50, az);
+    float a01 = fract(lang / 6.2831853);
+    float fiberA = hash21(vec2(floor(a01 * 280.0), 11.0));
+    float fiberB = hash21(vec2(floor(a01 * 70.0), 5.0));
+    vec3 iris = mix(uIrisLight, uIris, smoothstep(0.10, 0.34, az));
+    iris = mix(iris, uIrisDeep, smoothstep(0.36, 0.56, az) * 0.9);
+    iris *= 0.70 + 0.52 * fiberA;
+    iris *= 0.88 + 0.22 * fiberB;
+    iris += uIrisLight * exp(-pow((az - 0.20) / 0.055, 2.0)) * 0.22;
+    iris = mix(iris, uIrisDeep * 0.45, smoothstep(0.49, 0.56, az));
+    iris *= 0.50 + 0.60 * diff;
 
-    float pupilMask = smoothstep(0.175 * uPupil, 0.152 * uPupil, az);
+    float pupilMask = smoothstep(0.23 * uPupil, 0.20 * uPupil, az);
 
-    float g1 = smoothstep(0.030, 0.0, length(p - vec2(-0.048, 0.058)));
-    float g2 = smoothstep(0.011, 0.0, length(p - vec2(0.050, -0.036)));
+    float g1 = smoothstep(0.030, 0.0, length((p - vec2(0.055, 0.020)) * vec2(1.0, 1.25)));
+    float g2 = smoothstep(0.012, 0.0, length(p - vec2(0.020, -0.045)));
     float glint = clamp(g1 * 0.95 + g2 * 0.7, 0.0, 1.0);
 
     vec3 ball = sclera;
@@ -130,8 +135,8 @@ void main() {
     col = mix(col, vec3(1.0, 0.91, 0.89), water);
 
     float lash = 0.0;
-    for (int i = 0; i < 25; i++) {
-      float fi = float(i) / 24.0;
+    for (int i = 0; i < 33; i++) {
+      float fi = float(i) / 32.0;
       float x = mix(-w * 0.97, w * 0.97, fi);
       float sx = clamp(x / w, -1.0, 1.0);
       float sh = max(1.0 - sx * sx, 0.0);
