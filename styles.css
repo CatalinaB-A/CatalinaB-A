@@ -23,6 +23,8 @@
   --max: 960px;
 }
 
+:root[data-theme="dark"] .eye-bg { mix-blend-mode: screen; }
+
 :root[data-theme="dark"] {
   --bg: #121212;
   --surface: #1b1b1b;
@@ -178,7 +180,8 @@ main {
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  opacity: .24;
+  opacity: .30;
+  mix-blend-mode: multiply;
 }
 
 @media (max-width: 640px) {

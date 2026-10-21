@@ -71,10 +71,11 @@ void main() {
   skin = mix(skin, uSkinDeep, smoothstep(R * 0.14, 0.0, down) * 0.14);
   skin = mix(skin, uSkinDeep, smoothstep(R * 1.10, R * 0.55, up) * 0.10);
 
-  float crease = smoothstep(0.0065, 0.0, abs(p.y - (upper + R * 0.26))) * smoothstep(1.0, 0.82, abs(nx)) * 0.22;
+  float crease = smoothstep(0.0065, 0.0, abs(p.y - (upper + R * 0.26))) * smoothstep(1.0, 0.82, abs(nx)) * 0.30;
   skin = mix(skin, uSkinDeep, crease);
   float trough = smoothstep(0.020, 0.0, abs(p.y - (lower - R * 0.20))) * smoothstep(1.0, 0.80, abs(nx)) * 0.15;
   skin = mix(skin, uSkinDeep, trough);
+  skin = mix(skin, uSkinDeep, smoothstep(0.045, 0.0, abs(p.y - (upper + R * 0.62))) * smoothstep(1.0, 0.80, abs(nx)) * 0.08);
   skin *= 0.985 + 0.03 * hash21(floor(p * 260.0));
 
   vec3 col = skin;
@@ -104,7 +105,7 @@ void main() {
     iris = mix(iris, uIrisDeep, smoothstep(0.36, 0.56, az) * 0.9);
     iris *= 0.70 + 0.52 * fiberA;
     iris *= 0.88 + 0.22 * fiberB;
-    iris += uIrisLight * exp(-pow((az - 0.20) / 0.055, 2.0)) * 0.22;
+    iris += uIrisLight * exp(-pow((az - 0.20) / 0.055, 2.0)) * 0.30;
     iris = mix(iris, uIrisDeep * 0.45, smoothstep(0.49, 0.56, az));
     iris *= 0.50 + 0.60 * diff;
 
@@ -113,6 +114,15 @@ void main() {
     float g1 = smoothstep(0.030, 0.0, length((p - vec2(0.055, 0.020)) * vec2(1.0, 1.25)));
     float g2 = smoothstep(0.012, 0.0, length(p - vec2(0.020, -0.045)));
     float glint = clamp(g1 * 0.95 + g2 * 0.7, 0.0, 1.0);
+
+    float vein = 0.0;
+    for (int k = 0; k < 3; k++) {
+      float v = sin(atan(p.y, p.x) * (17.0 + 11.0 * float(k)) + az * (6.0 + 2.0 * float(k)) + float(k) * 2.1);
+      vein += smoothstep(0.975, 1.0, abs(v));
+    }
+    sclera = mix(sclera, vec3(0.70, 0.26, 0.26), vein * 0.22 * (1.0 - irisMask));
+    float gloss = smoothstep(0.11, 0.0, abs(p.x - 0.085)) * smoothstep(0.16, 0.02, abs(p.y - 0.02)) * 0.10;
+    sclera += vec3(gloss);
 
     vec3 ball = sclera;
     ball = mix(ball, iris, irisMask);
