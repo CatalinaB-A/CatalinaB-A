@@ -48,11 +48,11 @@ void main() {
   float z = sqrt(max(zz, 0.0));
   vec3 n = vec3(p, z) / max(R, 1e-4);
 
-  float w = R * 1.02;
+  float w = R * 0.94;
   float nx = clamp(p.x / w, -1.0, 1.0);
   float shape = max(1.0 - nx * nx, 0.0);
-  float upperOpen = R * 0.42 * pow(shape, 0.60);
-  float lowerOpen = -R * 0.34 * pow(shape, 0.85);
+  float upperOpen = R * 0.46 * pow(shape, 0.55);
+  float lowerOpen = -R * 0.38 * pow(shape, 0.75);
   float b = smoothstep(0.0, 1.0, uBlink);
   float upper = mix(upperOpen, lowerOpen + R * 0.028, b);
   float lower = mix(lowerOpen, lowerOpen + R * 0.08, b * 0.45);
@@ -152,8 +152,8 @@ void main() {
       float x = mix(-w * 0.98, w * 0.98, fi) + jit * 0.009;
       float sx = clamp(x / w, -1.0, 1.0);
       float sh = max(1.0 - sx * sx, 0.0);
-      float byOpen = R * 0.42 * pow(sh, 0.60);
-      float by = mix(byOpen, -R * 0.34 * pow(sh, 0.85) + R * 0.028, b);
+      float byOpen = R * 0.46 * pow(sh, 0.55);
+      float by = mix(byOpen, -R * 0.38 * pow(sh, 0.75) + R * 0.028, b);
       float edge = smoothstep(0.0, 0.22, sh);
       float outer = smoothstep(-1.0, 0.85, sx);
       float len = (0.040 + 0.055 * sh) * (0.78 + 0.42 * hash21(vec2(float(i), 9.0))) * (0.72 + 0.55 * outer);
@@ -182,7 +182,7 @@ void main() {
       float x = mix(-w * 0.84, w * 0.84, fi) + (hash21(vec2(float(i), 27.0)) - 0.5) * 0.008;
       float sx = clamp(x / w, -1.0, 1.0);
       float sh = max(1.0 - sx * sx, 0.0);
-      float byLow = -R * 0.34 * pow(sh, 0.85);
+      float byLow = -R * 0.38 * pow(sh, 0.75);
       float by = mix(byLow, byLow + R * 0.08, b * 0.45);
       float len = (0.016 + 0.022 * sh) * (0.70 + 0.60 * hash21(vec2(float(i), 21.0)));
       vec2 root = vec2(x, by + 0.0015);
