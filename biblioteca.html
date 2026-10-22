@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-i18n="meta.title.library">Biblioteca — Catalina Bustamante</title>
+  <meta name="description" data-i18n-content="meta.desc.library" content="Biblioteca personal: sube libros en PDF, EPUB, Word, texto o imágenes y léelos en la misma página.">
+  <script>
+    try {
+      document.documentElement.dataset.theme = localStorage.getItem('theme')
+        || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    } catch (error) {
+      document.documentElement.dataset.theme = 'light';
+    }
+  </script>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="biblioteca.css">
+  <script src="site-style.js"></script>
+  <script src="i18n.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#contenido" data-i18n="a11y.skip">Saltar al contenido</a>
+
+  <header class="bar">
+    <a class="brand" href="index.html">
+      <span class="brand-mark" aria-hidden="true">CB</span>
+      <span class="brand-name">Catalina Bustamante</span>
+    </a>
+    <nav id="menu" class="menu" data-i18n-aria="a11y.nav" aria-label="Navegación principal">
+      <a href="index.html#sobre-mi" data-i18n="nav.profile">Perfil</a>
+      <a href="index.html#experiencia" data-i18n="nav.experience">Experiencia</a>
+      <a href="index.html#formacion" data-i18n="nav.education">Formación</a>
+      <a href="biblioteca.html" aria-current="page" data-i18n="nav.library">Biblioteca</a>
+      <a href="index.html#contacto" data-i18n="nav.contact">Contacto</a>
+    </nav>
+    <div class="bar-tools">
+      <button class="toggle" type="button" aria-expanded="false" aria-controls="menu" data-i18n="a11y.menu">Menú</button>
+      <button class="lang" type="button" data-lang-toggle aria-label="Cambiar idioma"><span class="lang-code">ES</span></button>
+      <button class="theme" type="button" aria-label="Cambiar tema" aria-pressed="false">
+        <svg class="icon moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.6 14.2A8.5 8.5 0 1 1 9.8 3.4a6.8 6.8 0 0 0 10.8 10.8Z"/></svg>
+        <svg class="icon sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="contenido">
+    <section class="library-head">
+      <div>
+        <p class="eyebrow" data-i18n="lib.eyebrow">Biblioteca personal</p>
+        <h1 data-i18n-html="lib.title">Mi <span class="accent">estantería</span></h1>
+        <p class="lead" data-i18n="lib.lead">Sube un libro en el formato que tengas y léelo aquí mismo. Todo queda guardado en este navegador: sin cuentas, sin servidores, sin subir nada a internet.</p>
+      </div>
+      <div class="library-side">
+        <button class="btn" type="button" data-add data-i18n="lib.add">Añadir libro</button>
+        <p class="hint" id="count" data-i18n="lib.loading">Cargando estantería…</p>
+      </div>
+    </section>
+
+    <ol class="steps">
+      <li><span class="step-num">01</span><div><strong data-i18n="lib.step1.label">Añade</strong> <span data-i18n="lib.step1.text">PDF, EPUB, DOCX, TXT, MD, HTML o imágenes.</span></div></li>
+      <li><span class="step-num">02</span><div><strong data-i18n="lib.step2.label">Encuentra</strong> <span data-i18n="lib.step2.text">por título, autor o categoría.</span></div></li>
+      <li><span class="step-num">03</span><div><strong data-i18n="lib.step3.label">Lee</strong> <span data-i18n="lib.step3.text">y retoma donde quedaste.</span></div></li>
+    </ol>
+
+    <section class="toolbar" data-i18n-aria="a11y.filters" aria-label="Buscar y filtrar">
+      <label class="search">
+        <span class="sr-only" data-i18n="a11y.searchBooks">Buscar en la biblioteca</span>
+        <input id="q" type="search" data-i18n-placeholder="lib.searchPlaceholder" placeholder="Buscar por título, autor o categoría…" autocomplete="off">
+      </label>
+      <div class="chips" id="chips"></div>
+    </section>
+
+    <ul class="shelf" id="shelf"></ul>
+
+    <div class="empty" id="empty" hidden>
+      <svg viewBox="0 0 120 90" aria-hidden="true">
+        <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 76h100M10 44h100"/>
+          <rect x="20" y="18" width="12" height="26" rx="2"/>
+          <rect x="36" y="12" width="14" height="32" rx="2"/>
+          <rect x="54" y="22" width="10" height="22" rx="2"/>
+          <rect x="68" y="16" width="13" height="28" rx="2"/>
+          <path d="M25 56v18M38 52v22M57 58v16M71 54v20"/>
+        </g>
+      </svg>
+      <p data-i18n="lib.empty.title">La estantería está vacía.</p>
+      <p class="hint" data-i18n="lib.empty.hint">Arrastra tus libros aquí o usa «Añadir libro». Se guardan en este navegador.</p>
+      <button class="btn" type="button" data-add data-i18n="lib.empty.cta">Añadir el primero</button>
+    </div>
+    <p class="no-results" id="no-results" data-i18n="lib.noResults" hidden>Ningún libro coincide con la búsqueda.</p>
+
+    <p class="notice" id="notice" role="status" hidden></p>
+  </main>
+
+  <footer class="foot">
+    <p>© <span id="year">2026</span> Catalina del Pilar Bustamante Armijo ·
+      <a href="index.html" data-i18n="footer.back">Volver al portafolio</a></p>
+  </footer>
+
+  <dialog class="sheet" id="add" aria-labelledby="add-title">
+    <form id="add-form">
+      <h2 id="add-title" data-i18n="lib.addTitle">Añadir a la estantería</h2>
+      <label class="drop" id="drop">
+        <input type="file" id="file" hidden accept=".pdf,.epub,.docx,.txt,.md,.markdown,.html,.htm,.png,.jpg,.jpeg,.webp,.gif,.avif,.bmp,.svg">
+        <strong id="file-name" data-i18n="lib.drop">Arrastra un libro o haz clic para elegirlo</strong>
+        <span id="file-meta" data-i18n="lib.formats">PDF · EPUB · DOCX · TXT · MD · HTML · imágenes</span>
+      </label>
+      <div class="field">
+        <label for="t" data-i18n="lib.field.title">Título</label>
+        <input id="t" maxlength="140" required autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="a" data-i18n="lib.field.author">Autor(a)</label>
+        <input id="a" maxlength="80" data-i18n-placeholder="lib.field.authorPlaceholder" placeholder="Opcional" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="c" data-i18n="lib.field.category">Categoría</label>
+        <input id="c" maxlength="30" list="cats" data-i18n-placeholder="lib.field.categoryPlaceholder" placeholder="General" autocomplete="off">
+        <datalist id="cats"></datalist>
+      </div>
+      <div class="field">
+        <label for="d" data-i18n="lib.field.note">Nota</label>
+        <textarea id="d" rows="2" maxlength="240" data-i18n-placeholder="lib.field.notePlaceholder" placeholder="¿Por qué lo guardas? (opcional)"></textarea>
+      </div>
+      <p class="error" id="form-error" role="alert" hidden></p>
+      <div class="sheet-actions">
+        <button class="mini" type="button" data-close data-i18n="lib.cancel">Cancelar</button>
+        <button class="btn" type="submit" data-i18n="lib.save">Guardar libro</button>
+      </div>
+    </form>
+  </dialog>
+
+  <section class="reader" id="reader" role="dialog" aria-modal="true" aria-labelledby="reader-title" hidden>
+    <div class="reader-bar">
+      <button class="reader-btn" id="reader-close" type="button" data-i18n-aria="lib.reader.close" aria-label="Cerrar lector">←</button>
+      <div class="reader-info">
+        <strong id="reader-title"></strong>
+        <span id="reader-sub"></span>
+      </div>
+      <div class="reader-tools">
+        <button class="reader-btn" id="turn-prev" type="button" data-i18n-aria="lib.reader.prev" aria-label="Página anterior" hidden>‹</button>
+        <button class="reader-btn" id="turn-next" type="button" data-i18n-aria="lib.reader.next" aria-label="Página siguiente" hidden>›</button>
+        <button class="reader-btn" id="size-down" type="button" data-i18n-aria="lib.reader.smaller" aria-label="Texto más pequeño">A−</button>
+        <button class="reader-btn" id="size-up" type="button" data-i18n-aria="lib.reader.larger" aria-label="Texto más grande">A+</button>
+        <button class="reader-btn" id="look" type="button" data-i18n-aria="lib.reader.look" data-i18n-title="lib.reader.lookTitle" aria-label="Cambiar aspecto del lector" title="Claro, papel o noche">◐</button>
+        <a class="reader-btn" id="reader-download" download data-i18n-aria="lib.reader.download" aria-label="Descargar el archivo">↓</a>
+      </div>
+    </div>
+    <div class="reader-progress" id="reader-progress" aria-hidden="true"><span id="reader-fill"></span></div>
+    <div class="reader-body" id="reader-body" tabindex="0"></div>
+  </section>
+
+  <p class="sr-only" id="status" aria-live="polite"></p>
+
+  <script src="style-panel.js" defer></script>
+  <script src="content-editor.js" defer></script>
+  <script src="biblioteca.js" defer></script>
+</body>
+</html>

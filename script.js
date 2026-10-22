@@ -82,10 +82,12 @@ if (nameEl && window.createBlurText) {
   });
 }
 
+const tr = key => (window.i18n ? window.i18n.t(key) : key);
+
 const syncTheme = () => {
   const dark = isDark();
   themeBtn.setAttribute('aria-pressed', String(dark));
-  themeBtn.setAttribute('aria-label', dark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
+  themeBtn.setAttribute('aria-label', tr(dark ? 'a11y.themeLight' : 'a11y.themeDark'));
 };
 
 const applyTheme = () => {
@@ -121,72 +123,32 @@ scheme.addEventListener('change', () => {
 
 syncTheme();
 
-/* --- editor de contenido local --- */
-const EDITABLE = 'main h2, main h3, main p, main dt, main dd, main li, .foot p';
-const STORE_KEY = 'site-content';
-const editableNodes = () => Array.from(document.querySelectorAll(EDITABLE));
+/* --- sección activa en el menú --- */
+const navLinks = Array.from(document.querySelectorAll('#menu a[href^="#"]'));
+const spySections = navLinks
+  .map(link => document.querySelector(link.getAttribute('href')))
+  .filter(Boolean);
 
-try {
-  const saved = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
-  if (Array.isArray(saved) && saved.length === editableNodes().length) {
-    editableNodes().forEach((node, i) => { node.innerHTML = saved[i]; });
-  }
-} catch {
-  /* sin contenido guardado */
+if (spySections.length && 'IntersectionObserver' in window) {
+  const spy = new IntersectionObserver(entries => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      navLinks.forEach(link => {
+        if (link.getAttribute('href') === `#${entry.target.id}`) link.setAttribute('aria-current', 'location');
+        else link.removeAttribute('aria-current');
+      });
+    }
+  }, { rootMargin: '-42% 0px -52% 0px' });
+
+  spySections.forEach(section => spy.observe(section));
 }
 
-const editBar = document.createElement('div');
-editBar.className = 'edit-bar';
-editBar.hidden = true;
-editBar.innerHTML = '<button type="button" data-edit-action="save">Guardar</button>'
-  + '<button type="button" data-edit-action="download">Descargar HTML</button>'
-  + '<button type="button" data-edit-action="close">Cerrar</button>';
-const editBtn = document.createElement('button');
-editBtn.type = 'button';
-editBtn.className = 'edit-toggle';
-editBtn.textContent = 'Editar';
-editBtn.setAttribute('aria-pressed', 'false');
-document.body.append(editBar, editBtn);
-
-const setEditing = on => {
-  document.body.classList.toggle('editing', on);
-  editableNodes().forEach(node => {
-    if (on) node.setAttribute('contenteditable', 'true');
-    else node.removeAttribute('contenteditable');
-  });
-  editBar.hidden = !on;
-  editBtn.textContent = on ? 'Editando' : 'Editar';
-  editBtn.setAttribute('aria-pressed', String(on));
-};
-
-const saveContent = () => {
-  try {
-    localStorage.setItem(STORE_KEY, JSON.stringify(editableNodes().map(node => node.innerHTML)));
-  } catch {
-    /* almacenamiento bloqueado */
-  }
-};
-
-const downloadPage = () => {
-  const clone = document.documentElement.cloneNode(true);
-  clone.querySelectorAll('#eye canvas, #tunnel .light-tunnel-container').forEach(node => node.remove());
-  const name = clone.querySelector('#name');
-  if (name) name.textContent = name.querySelector('.sr-only')?.textContent || name.textContent;
-  clone.querySelectorAll('[contenteditable]').forEach(node => node.removeAttribute('contenteditable'));
-  clone.querySelectorAll('.edit-bar, .edit-toggle').forEach(node => node.remove());
-  clone.querySelector('body')?.classList.remove('editing');
-  const url = URL.createObjectURL(new Blob(['<!DOCTYPE html>\n' + clone.outerHTML], { type: 'text/html' }));
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = 'index.html';
-  link.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-};
-
-editBtn.addEventListener('click', () => setEditing(!document.body.classList.contains('editing')));
-editBar.addEventListener('click', event => {
-  const action = event.target.dataset.editAction;
-  if (action === 'save') saveContent();
-  if (action === 'download') { saveContent(); downloadPage(); }
-  if (action === 'close') setEditing(false);
+/* --- editor de contenido local, bloque a bloque --- */
+window.createContentEditor({
+  editable: 'main h2, main h3, main p, main dt, main dd, main li, .foot p',
+  storageKey: 'site-content',
+  downloadName: 'index.html',
+  onEditingChange: open => window.stylePanel?.setOpen(open)
 });
+
+document.addEventListener('langchange', syncTheme);
