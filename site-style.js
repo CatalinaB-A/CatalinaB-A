@@ -3,6 +3,13 @@
   const KEY = 'site-style';
   const COLORS = ['bg', 'surface', 'fg', 'muted', 'border', 'accent', 'name', 'gold'];
 
+  /* Edición local: desactivada en el sitio publicado */
+  const host = location.hostname;
+  window.isLocalSite = location.protocol === 'file:'
+    || ['localhost', '127.0.0.1', '::1', '[::1]', '0.0.0.0'].includes(host)
+    || host.endsWith('.local')
+    || /^(10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(host);
+
   let data = {};
   try {
     const saved = JSON.parse(localStorage.getItem(KEY) || 'null');

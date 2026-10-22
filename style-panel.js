@@ -2,6 +2,7 @@
 (() => {
   const api = window.siteStyle;
   if (!api) return;
+  if (!window.isLocalSite) return;
 
   const tr = (key, vars) => (window.i18n ? window.i18n.t(key, vars) : key);
   const root = document.documentElement;

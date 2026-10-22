@@ -3,6 +3,10 @@
   const tr = (key, vars) => (window.i18n ? window.i18n.t(key, vars) : key);
 
   window.createContentEditor = ({ editable, storageKey, downloadName, onEditingChange }) => {
+    if (!window.isLocalSite) {
+      return { setEditing: () => {}, close: () => {}, isEditing: () => false, toggle: () => {} };
+    }
+
     const nodes = () => Array.from(document.querySelectorAll(editable));
 
     /* clave estable por bloque: contenedor + etiqueta + posición */
