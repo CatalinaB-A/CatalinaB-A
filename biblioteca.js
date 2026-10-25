@@ -49,6 +49,7 @@ const editor = window.createContentEditor
       editable: 'main .library-head .eyebrow, main .library-head h1, main .library-head .lead, .steps strong, .steps div > span, #empty > p, #empty .hint, .foot p',
       storageKey: 'biblioteca-content',
       downloadName: 'biblioteca.html',
+      scope: 'library',
       onEditingChange: open => window.stylePanel?.setOpen(open)
     })
   : null;

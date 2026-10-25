@@ -1,28 +1,41 @@
-/* Edición local por bloques de texto, compartida por el portafolio y la biblioteca */
+/* Editor local por bloques + aplicación de las ediciones publicadas */
 (() => {
   const tr = (key, vars) => (window.i18n ? window.i18n.t(key, vars) : key);
 
-  window.createContentEditor = ({ editable, storageKey, downloadName, onEditingChange }) => {
-    if (!window.isLocalSite) {
-      return { setEditing: () => {}, close: () => {}, isEditing: () => false, toggle: () => {} };
+  const readObject = key => {
+    try {
+      const raw = JSON.parse(localStorage.getItem(key) || 'null');
+      return raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+    } catch {
+      return {};
     }
+  };
 
+  window.createContentEditor = ({ editable, storageKey, downloadName, scope = 'site', onEditingChange }) => {
+    const isLocal = Boolean(window.isLocalSite);
     const nodes = () => Array.from(document.querySelectorAll(editable));
 
     /* clave estable por bloque: contenedor + etiqueta + posición */
     const keyFor = node => {
-      const scope = node.closest('section, footer, ol, [id]');
-      const holder = scope || document.body;
-      const scopeName = scope ? (scope.id || scope.className || scope.tagName.toLowerCase()) : 'body';
+      const holder = node.closest('section, footer, ol, [id]') || document.body;
+      const scopeName = holder === document.body
+        ? 'body'
+        : (holder.id || holder.className || holder.tagName.toLowerCase());
       const peers = Array.from(holder.querySelectorAll(editable));
       return `${scopeName}|${node.tagName.toLowerCase()}|${peers.indexOf(node)}`;
     };
 
-    const ensureKeys = () => {
-      nodes().forEach(node => {
-        if (!node.dataset.editKey) node.dataset.editKey = keyFor(node);
-      });
+    const keyCache = new WeakMap();
+    const keyOf = node => {
+      if (!keyCache.has(node)) keyCache.set(node, keyFor(node));
+      return keyCache.get(node);
     };
+
+    const ensureKeys = () => nodes().forEach(keyOf);
+
+    const markKeys = () => nodes().forEach(node => {
+      node.dataset.editKey = keyOf(node);
+    });
 
     const readContent = () => {
       try {
@@ -31,7 +44,7 @@
           ensureKeys();
           const map = {};
           nodes().forEach((node, index) => {
-            if (typeof saved[index] === 'string') map[node.dataset.editKey] = saved[index];
+            if (typeof saved[index] === 'string') map[keyOf(node)] = saved[index];
           });
           return map;
         }
@@ -44,6 +57,30 @@
     ensureKeys();
     let contentMap = readContent();
 
+    const published = () => {
+      const map = window.EDICIONES?.content?.[scope];
+      return map && typeof map === 'object' ? map : {};
+    };
+
+    const applyContent = () => {
+      if (window.i18n && window.i18n.lang !== 'es') return;
+      const base = published();
+      nodes().forEach(node => {
+        const key = keyOf(node);
+        const value = contentMap[key] ?? base[key];
+        if (typeof value === 'string') node.innerHTML = value;
+      });
+    };
+
+    applyContent();
+    document.addEventListener('DOMContentLoaded', applyContent);
+    document.addEventListener('langchange', applyContent);
+
+    /* En el sitio publicado solo se aplican las ediciones, no se edita */
+    if (!isLocal) {
+      return { setEditing: () => {}, close: () => {}, isEditing: () => false, toggle: () => {} };
+    }
+
     const persist = () => {
       try {
         localStorage.setItem(storageKey, JSON.stringify(contentMap));
@@ -52,22 +89,12 @@
       }
     };
 
-    const restore = () => {
-      if (window.i18n && window.i18n.lang !== 'es') return;
-      ensureKeys();
-      nodes().forEach(node => {
-        const saved = contentMap[node.dataset.editKey];
-        if (typeof saved === 'string') node.innerHTML = saved;
-      });
-    };
-    restore();
-    document.addEventListener('DOMContentLoaded', restore);
-
     const bar = document.createElement('div');
     bar.className = 'edit-bar';
     bar.hidden = true;
     bar.innerHTML = '<span class="edit-hint" data-i18n="editor.hint">Haz clic en un bloque para editarlo</span>'
       + '<button type="button" data-edit-action="save" data-i18n="editor.save">Guardar</button>'
+      + '<button type="button" data-edit-action="export" data-i18n="editor.export">Exportar cambios</button>'
       + '<button type="button" data-edit-action="download" data-i18n="editor.download">Descargar HTML</button>'
       + '<button type="button" data-edit-action="close" data-i18n="editor.close">Cerrar</button>';
 
@@ -79,7 +106,6 @@
 
     document.body.append(bar, button);
 
-    /* un solo bloque editable a la vez */
     let activeBlock = null;
 
     const stopBlock = () => {
@@ -87,7 +113,7 @@
       const node = activeBlock;
       activeBlock = null;
       node.removeAttribute('contenteditable');
-      contentMap[node.dataset.editKey] = node.innerHTML;
+      contentMap[keyOf(node)] = node.innerHTML;
       persist();
     };
 
@@ -123,6 +149,7 @@
       document.body.classList.toggle('editing', on);
       if (on) {
         ensureKeys();
+        markKeys();
       } else {
         stopBlock();
         nodes().forEach(node => node.removeAttribute('contenteditable'));
@@ -131,6 +158,32 @@
       button.textContent = on ? tr('editor.editing') : tr('editor.edit');
       button.setAttribute('aria-pressed', String(on));
       if (onEditingChange) onEditingChange(on);
+    };
+
+    const downloadText = (text, name) => {
+      const url = URL.createObjectURL(new Blob([text], { type: 'text/javascript' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = name;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    };
+
+    const exportPublished = () => {
+      stopBlock();
+      persist();
+      const payload = {
+        content: {
+          site: readObject('site-content'),
+          library: readObject('biblioteca-content')
+        },
+        style: readObject('site-style')
+      };
+      downloadText(
+        '/* Ediciones publicadas. Generado con «Exportar cambios» desde la edición local. */\n'
+        + `window.EDICIONES = ${JSON.stringify(payload, null, 2)};\n`,
+        'ediciones-publicadas.js'
+      );
     };
 
     const downloadPage = () => {
@@ -159,13 +212,13 @@
         stopBlock();
         persist();
       }
+      if (action === 'export') exportPublished();
       if (action === 'download') downloadPage();
       if (action === 'close') setEditing(false);
     });
 
     document.addEventListener('langchange', () => {
       button.textContent = document.body.classList.contains('editing') ? tr('editor.editing') : tr('editor.edit');
-      restore();
     });
 
     return {

@@ -156,6 +156,7 @@
 
       'editor.save': 'Guardar',
       'editor.hint': 'Haz clic en un bloque para editarlo',
+      'editor.export': 'Exportar cambios',
       'editor.download': 'Descargar HTML',
       'editor.close': 'Cerrar',
       'editor.edit': 'Editar',
@@ -341,6 +342,7 @@
 
       'editor.save': 'Save',
       'editor.hint': 'Click a block to edit it',
+      'editor.export': 'Export changes',
       'editor.download': 'Download HTML',
       'editor.close': 'Close',
       'editor.edit': 'Edit',
@@ -526,6 +528,7 @@
 
       'editor.save': 'Enregistrer',
       'editor.hint': 'Cliquez sur un bloc pour le modifier',
+      'editor.export': 'Exporter les modifications',
       'editor.download': 'Télécharger le HTML',
       'editor.close': 'Fermer',
       'editor.edit': 'Modifier',
@@ -711,6 +714,7 @@
 
       'editor.save': '保存',
       'editor.hint': '点击一个文本块进行编辑',
+      'editor.export': '导出修改',
       'editor.download': '下载 HTML',
       'editor.close': '关闭',
       'editor.edit': '编辑',

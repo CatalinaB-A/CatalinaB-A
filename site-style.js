@@ -16,6 +16,10 @@
     if (saved && typeof saved === 'object') data = saved;
   } catch { /* sin estilos guardados */ }
 
+  if (!Object.keys(data).length && window.EDICIONES?.style && typeof window.EDICIONES.style === 'object') {
+    data = window.EDICIONES.style;
+  }
+
   const styleEl = document.createElement('style');
   styleEl.id = 'site-style';
   document.head.append(styleEl);
