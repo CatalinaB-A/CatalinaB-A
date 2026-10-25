@@ -126,12 +126,17 @@ a { color: var(--accent); }
   border: 1px solid var(--gold-line);
   background: var(--surface);
   color: var(--name);
-  font-family: var(--font-heading, inherit);
-  font-size: .66rem;
-  font-weight: 650;
-  letter-spacing: .08em;
+  overflow: hidden;
   box-shadow: 0 0 0 1px var(--gold-ring), 0 0 18px -8px var(--gold-glow);
 }
+
+.brand-mark img {
+  width: 1.5rem;
+  height: 1.5rem;
+  display: block;
+}
+
+:root[data-theme="dark"] .brand-mark img { filter: invert(1); }
 
 .brand-name {
   font-weight: 650;
