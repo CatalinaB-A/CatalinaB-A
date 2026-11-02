@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Editor local — Catalina Bustamante</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="favicon.png" type="image/png">
+  <script>
+    try {
+      document.documentElement.dataset.theme = localStorage.getItem('theme')
+        || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    } catch (error) {
+      document.documentElement.dataset.theme = 'light';
+    }
+  </script>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="editor.css">
+</head>
+<body class="editor-page">
+  <header class="editor-bar">
+    <strong class="editor-brand">Editor local</strong>
+    <span class="editor-chip" id="server-status">Conectando…</span>
+    <a class="mini" href="/index.html" target="_blank" rel="noopener">Abrir index</a>
+    <a class="mini" href="https://catalinab-a.github.io/CatalinaB-A/" target="_blank" rel="noopener">Sitio publicado</a>
+  </header>
+
+  <p class="editor-remote" id="remote-warning" hidden>
+    Este editor solo funciona con el servidor local. Ejecuta <code>editor.cmd</code> en la carpeta del proyecto.
+  </p>
+
+  <main class="editor-main">
+    <section class="editor-panel" aria-label="Publicación">
+      <h1>Publicar cambios</h1>
+      <p class="editor-hint">En la vista, pulsa <strong>Editar</strong> y luego un bloque. Los cambios se guardan en este navegador y se ven al instante.</p>
+
+      <label class="editor-label" for="commit-message">Mensaje del commit</label>
+      <textarea id="commit-message" rows="3" maxlength="200" spellcheck="true">Actualiza el contenido y el estilo del sitio</textarea>
+
+      <div class="editor-actions">
+        <button id="publish" class="btn" type="button">Publicar en GitHub</button>
+        <button id="edit-toggle" class="btn ghost" type="button">Activar edición</button>
+        <button id="reload" class="btn ghost" type="button">Recargar vista</button>
+        <button id="status" class="btn ghost" type="button">Ver estado</button>
+        <button id="discard" class="btn ghost" type="button">Descartar locales</button>
+        <label class="btn ghost editor-import">Importar…
+          <input id="import" type="file" accept=".js,.json,application/json,text/javascript" hidden>
+        </label>
+      </div>
+
+      <pre id="log" class="editor-log" aria-live="polite">Listo. Edita en la vista y publica cuando quieras.</pre>
+    </section>
+
+    <div class="editor-preview">
+      <iframe id="preview" src="/index.html" title="Vista previa editable del sitio"></iframe>
+    </div>
+  </main>
+
+  <script src="editor.js"></script>
+</body>
+</html>
