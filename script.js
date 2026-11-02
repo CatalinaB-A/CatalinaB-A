@@ -143,6 +143,21 @@ if (spySections.length && 'IntersectionObserver' in window) {
   spySections.forEach(section => spy.observe(section));
 }
 
+/* --- mensaje de concurso (solo en el sitio publicado) --- */
+const prize = document.getElementById('prize');
+if (prize && !window.isLocalSite) {
+  const showPrize = () => {
+    if (prize.open) return;
+    if (typeof prize.showModal === 'function') prize.showModal();
+  };
+
+  setTimeout(showPrize, 700);
+
+  prize.addEventListener('click', event => {
+    if (event.target === prize || event.target.closest('[data-prize-close]')) prize.close();
+  });
+}
+
 /* --- editor de contenido local, bloque a bloque --- */
 try {
   const legacy = JSON.parse(localStorage.getItem('biblioteca-content') || 'null');
