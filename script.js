@@ -144,10 +144,25 @@ if (spySections.length && 'IntersectionObserver' in window) {
 }
 
 /* --- editor de contenido local, bloque a bloque --- */
-window.createContentEditor({
-  editable: 'main h2, main h3, main p, main dt, main dd, main li, .foot p',
+try {
+  const legacy = JSON.parse(localStorage.getItem('biblioteca-content') || 'null');
+  if (legacy && typeof legacy === 'object' && Object.keys(legacy).length) {
+    const current = JSON.parse(localStorage.getItem('site-content') || 'null') || {};
+    localStorage.setItem('site-content', JSON.stringify({ ...legacy, ...current }));
+    localStorage.removeItem('biblioteca-content');
+  }
+} catch { /* sin datos antiguos */ }
+
+window.contentEditor = window.createContentEditor({
+  editable: '#inicio p, #sobre-mi h2, #sobre-mi p, #gestion h2, #gestion dt, #gestion dd, '
+    + '#experiencia h2, #experiencia h3, #experiencia p, #experiencia li, '
+    + '#formacion h2, #formacion dt, #formacion dd, #competencias h2, #competencias dt, #competencias dd, '
+    + '#contacto h2, #contacto p, '
+    + '#biblioteca .library-head .eyebrow, #biblioteca .library-head h1, #biblioteca .library-head .lead, '
+    + '#biblioteca .steps strong, #biblioteca .steps div > span, #empty > p, .foot p',
   storageKey: 'site-content',
   downloadName: 'index.html',
+  scope: 'site',
   onEditingChange: open => window.stylePanel?.setOpen(open)
 });
 

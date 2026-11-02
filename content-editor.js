@@ -58,8 +58,12 @@
     let contentMap = readContent();
 
     const published = () => {
-      const map = window.EDICIONES?.content?.[scope];
-      return map && typeof map === 'object' ? map : {};
+      const content = window.EDICIONES?.content || {};
+      const own = content[scope] && typeof content[scope] === 'object' ? content[scope] : {};
+      const extra = scope === 'site' && content.library && typeof content.library === 'object'
+        ? content.library
+        : {};
+      return { ...extra, ...own };
     };
 
     const applyContent = () => {

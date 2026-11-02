@@ -1,6 +1,13 @@
 /* Biblioteca — usa los tokens de styles.css */
 .menu a[aria-current="page"] { color: var(--fg); }
 
+/* Biblioteca integrada en el portafolio */
+#biblioteca {
+  border-top: 1px solid var(--border);
+  scroll-margin-top: 5rem;
+  padding-bottom: .5rem;
+}
+
 .library-head {
   display: flex;
   flex-wrap: wrap;

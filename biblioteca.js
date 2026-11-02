@@ -1,4 +1,5 @@
 /* Biblioteca: estantería local (IndexedDB) y lector en página */
+(() => {
 const $ = (sel, el = document) => el.querySelector(sel);
 const el = (tag, props = {}, ...kids) => {
   const node = document.createElement(tag);
@@ -12,47 +13,7 @@ const el = (tag, props = {}, ...kids) => {
   return node;
 };
 
-/* --- tema y menú --- */
-const root = document.documentElement;
 const tr = (key, vars) => (window.i18n ? window.i18n.t(key, vars) : key);
-const themeBtn = $('.theme');
-const syncTheme = () => {
-  const dark = root.dataset.theme === 'dark';
-  themeBtn.setAttribute('aria-pressed', String(dark));
-  themeBtn.setAttribute('aria-label', tr(dark ? 'a11y.themeLight' : 'a11y.themeDark'));
-};
-themeBtn.addEventListener('click', () => {
-  root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
-  try { localStorage.setItem('theme', root.dataset.theme); } catch { /* sesión */ }
-  syncTheme();
-});
-syncTheme();
-
-const menuToggle = document.querySelector('.toggle');
-const menu = document.getElementById('menu');
-menuToggle.addEventListener('click', () => {
-  const open = menu.classList.toggle('open');
-  menuToggle.setAttribute('aria-expanded', String(open));
-});
-menu.addEventListener('click', event => {
-  if (event.target.matches('a')) {
-    menu.classList.remove('open');
-    menuToggle.setAttribute('aria-expanded', 'false');
-  }
-});
-
-document.getElementById('year').textContent = new Date().getFullYear();
-
-/* --- edición de textos y ajustes de estilo --- */
-const editor = window.createContentEditor
-  ? window.createContentEditor({
-      editable: 'main .library-head .eyebrow, main .library-head h1, main .library-head .lead, .steps strong, .steps div > span, #empty > p, #empty .hint, .foot p',
-      storageKey: 'biblioteca-content',
-      downloadName: 'biblioteca.html',
-      scope: 'library',
-      onEditingChange: open => window.stylePanel?.setOpen(open)
-    })
-  : null;
 
 /* --- almacenamiento --- */
 const DB_NAME = 'biblioteca-catalina';
@@ -840,7 +801,7 @@ const pdfReader = async book => {
 
 const openBook = async book => {
   clearReader();
-  editor?.setEditing(false);
+  window.contentEditor?.setEditing(false);
   lastBookId = book.id;
   reader.hidden = false;
   document.body.classList.add('reading');
@@ -895,7 +856,6 @@ $('#q').addEventListener('input', event => {
 });
 
 document.addEventListener('langchange', () => {
-  syncTheme();
   render();
   refreshReaderMeta?.();
 });
@@ -915,3 +875,4 @@ dbReady
     empty.hidden = false;
     notify(tr('lib.storageNotice'));
   });
+})();
