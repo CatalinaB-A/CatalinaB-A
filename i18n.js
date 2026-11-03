@@ -155,10 +155,6 @@
       'lib.reader.error': 'No se pudo abrir el libro. Revisa la conexión (el lector EPUB/Word se carga desde internet) o descárgalo.',
 
       'editor.save': 'Guardar',
-      'prize.kicker': 'Concurso',
-      'prize.title': '¡Felicidades, Rodrigo Molina Ávila!',
-      'prize.body': 'Te has ganado un concurso.',
-      'prize.close': 'Cerrar',
       'editor.hint': 'Haz clic en un bloque para editarlo',
       'editor.export': 'Exportar cambios',
       'editor.download': 'Descargar HTML',
@@ -345,10 +341,6 @@
       'lib.reader.error': 'The book could not be opened. Check your connection (the EPUB/Word reader loads from the internet) or download it.',
 
       'editor.save': 'Save',
-      'prize.kicker': 'Contest',
-      'prize.title': 'Congratulations, Rodrigo Molina Ávila!',
-      'prize.body': 'You have won a contest.',
-      'prize.close': 'Close',
       'editor.hint': 'Click a block to edit it',
       'editor.export': 'Export changes',
       'editor.download': 'Download HTML',
@@ -535,10 +527,6 @@
       'lib.reader.error': 'Impossible d’ouvrir le livre. Vérifiez la connexion (le lecteur EPUB/Word se charge depuis internet) ou téléchargez-le.',
 
       'editor.save': 'Enregistrer',
-      'prize.kicker': 'Concours',
-      'prize.title': 'Félicitations, Rodrigo Molina Ávila !',
-      'prize.body': 'Vous avez gagné un concours.',
-      'prize.close': 'Fermer',
       'editor.hint': 'Cliquez sur un bloc pour le modifier',
       'editor.export': 'Exporter les modifications',
       'editor.download': 'Télécharger le HTML',
@@ -725,10 +713,6 @@
       'lib.reader.error': '无法打开此书。请检查网络（EPUB/Word 阅读器从互联网加载），或直接下载。',
 
       'editor.save': '保存',
-      'prize.kicker': '抽奖活动',
-      'prize.title': '恭喜 Rodrigo Molina Ávila！',
-      'prize.body': '你中奖了。',
-      'prize.close': '关闭',
       'editor.hint': '点击一个文本块进行编辑',
       'editor.export': '导出修改',
       'editor.download': '下载 HTML',
